@@ -230,7 +230,10 @@ def get_features(data_folder, patient_files_trn) :
     return features, labels
 
 
-def get_feature_one(data_folder, patient_data, verbose = 0) :
+def get_feature_one(patient_data, verbose = 0) :
+
+    age_classes = ['Neonate', 'Infant', 'Child', 'Adolescent', 'Young Adult']
+    recording_locations = ['AV', 'MV', 'PV', 'TV', 'PhC']
     
     num_locations = get_num_locations(patient_data)
     recording_information = patient_data.split('\n')[1:num_locations+1]
@@ -241,19 +244,19 @@ def get_feature_one(data_folder, patient_data, verbose = 0) :
     features['hw'] = []
     features['preg'] = []
     features['loc'] = []
-    features['mel1'] = []
+#    features['mel1'] = []
     for j in range(num_locations) :
         entries = recording_information[j].split(' ')
         recording_file = entries[2]
-        filename = os.path.join(data_folder, recording_file)
+#        filename = os.path.join(data_folder, recording_file)
 
         # Extract id
     #    id1 = recording_file.split('_')[0]
     #    features['id'].append(id1)
 
         # Extract melspec
-        mel1 = feature_extract_melspec(filename)[0]
-        features['mel1'].append(mel1)
+#        mel1 = feature_extract_melspec(filename)[0]
+#        features['mel1'].append(mel1)
 
         # Extract age_group
         age_group = get_age(patient_data)
@@ -292,10 +295,6 @@ def get_feature_one(data_folder, patient_data, verbose = 0) :
             loc_features[j] = 1
         features['loc'].append(loc_features)
         
-        
-    M, N = features['mel1'][0].shape
-    for i in range(len(features['mel1'])) :
-        features['mel1'][i] = features['mel1'][i].reshape(M,N,1)
 
     for k1 in features.keys() :
         features[k1] = np.array(features[k1])

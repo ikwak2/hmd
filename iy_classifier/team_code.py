@@ -12,7 +12,10 @@
 from helper_code import *
 import numpy as np, scipy as sp, scipy.stats, os, sys, joblib
 from sklearn.impute import SimpleImputer
-from sklearn.ensemble import RandomForestClassifier
+#from sklearn.ensemble import RandomForestClassifier
+from models import *
+from get_feature import *
+import pickle as pk
 
 ################################################################################
 #
@@ -44,56 +47,56 @@ def train_challenge_model(data_folder, model_folder, verbose):
     if verbose >= 1:
         print('Extracting features and labels from the Challenge data...')
 
-    features = list()
-    labels = list()
+    features1 = get_features(data_folder, patient_files)
+    model = get_toy((100, 313, 1))
 
-    for i in range(num_patient_files):
-        if verbose >= 2:
-            print('    {}/{}...'.format(i+1, num_patient_files))
-
-        # Load the current patient data and recordings.
-        current_patient_data = load_patient_data(patient_files[i])
-        current_recordings = load_recordings(data_folder, current_patient_data)
-
-        # Extract features.
-        current_features = get_features(current_patient_data, current_recordings)
-        features.append(current_features)
-
-        # Extract labels and use one-hot encoding.
-        current_labels = np.zeros(num_classes, dtype=int)
-        label = get_label(current_patient_data)
-        if label in classes:
-            j = classes.index(label)
-            current_labels[j] = 1
-        labels.append(current_labels)
-
-    features = np.vstack(features)
-    labels = np.vstack(labels)
+    model.compile(optimizer = "adam", 
+             loss = "categorical_crossentropy",
+             metrics = "accuracy")    
+    
 
     # Train the model.
     if verbose >= 1:
         print('Training model...')
-
+    imputer = SimpleImputer().fit(features1[0]['hw'])
+    features1[0]['hw'] = imputer.transform(features1[0]['hw'])
+    model.fit([features1[0]['age'],features1[0]['sex'], features1[0]['hw'], features1[0]['preg'], features1[0]['loc'], 
+           features1[0]['mel1']], features1[1],
+          epochs = 30)    
+    
+    
     # Define parameters for random forest classifier.
-    n_estimators = 10    # Number of trees in the forest.
-    max_leaf_nodes = 100 # Maximum number of leaf nodes in each tree.
-    random_state = 123   # Random state; set for reproducibility.
+#    n_estimators = 10    # Number of trees in the forest.
+#    max_leaf_nodes = 100 # Maximum number of leaf nodes in each tree.
+#    random_state = 123   # Random state; set for reproducibility.
 
-    imputer = SimpleImputer().fit(features)
-    features = imputer.transform(features)
-    classifier = RandomForestClassifier(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes, random_state=random_state).fit(features, labels)
+#    imputer = SimpleImputer().fit(features)
+#    features = imputer.transform(features)
+#    classifier = RandomForestClassifier(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes, random_state=random_state).fit(features, labels)
 
     # Save the model.
-    save_challenge_model(model_folder, classes, imputer, classifier)
-
+#    save_challenge_model(model_folder, classes, imputer, model)
+    save_challenge_model(model_folder, model, classes, m_name = 'toy', mel_shape = (100, 313, 1) )
     if verbose >= 1:
         print('Done.')
 
 # Load your trained model. This function is *required*. You should edit this function to add your code, but do *not* change the
 # arguments of this function.
+
+#def load_challenge_model(model_folder, verbose):
+#    filename = os.path.join(model_folder, 'model.sav')
+#    return joblib.load(filename)
+
 def load_challenge_model(model_folder, verbose):
-    filename = os.path.join(model_folder, 'model.sav')
-    return joblib.load(filename)
+    info_fnm = os.path.join(model_folder, 'desc.pk')
+    with open(info_fnm, 'rb') as f:
+        info_m = pk.load(f)
+#    if info_m['model'] == 'toy' :
+#        model = get_toy(info_m['mel_shape'])
+#    filename = os.path.join(model_folder, info_m['model'] + '_model.hdf5')
+#    model.load_weights(filename)
+    return info_m
+
 
 # Run your trained model. This function is *required*. You should edit this function to add your code, but do *not* change the
 # arguments of this function.
@@ -102,6 +105,11 @@ def run_challenge_model(model, data, recordings, verbose):
     imputer = model['imputer']
     classifier = model['classifier']
 
+    if model['model'] == 'toy' :
+        model1 = get_toy(info_m['mel_shape'])
+    filename = os.path.join(model_folder, info_m['model'] + '_model.hdf5')
+    model.load_weights(filename)
+    
     # Load features.
     features = get_features(data, recordings)
 
@@ -120,6 +128,41 @@ def run_challenge_model(model, data, recordings, verbose):
 
     return classes, labels, probabilities
 
+def run_challenge_model(model, data, recordings, verbose):
+    
+    if model['model'] == 'toy' :
+        model1 = get_toy(model['mel_shape'])
+    filename = os.path.join(model_folder, model['model'] + '_model.hdf5')
+    model1.load_weights(filename)
+    
+    classes = model['classes']
+    # Load features.
+    features = get_feature_one(data, verbose)
+
+    features['mel1'] = []
+    for i in range(len(recordings)) :
+        mel1 = feature_extract_melspec(recordings[i])[0]
+        features['mel1'].append(mel1)
+
+    M, N = features['mel1'][0].shape
+    for i in range(len(features['mel1'])) :
+        features['mel1'][i] = features['mel1'][i].reshape(M,N,1)   
+        
+    features['mel1'] = np.array(features['mel1'])
+#    print(features)
+    # Impute missing data.
+    res1 = model1.predict([features['age'], features['sex'], features['hw'], features['preg'], features['loc'], features['mel1']])
+
+    # Get classifier probabilities.
+    prob1 = res1.mean(axis = 0) ## simple rule for now
+    idx = np.argmax(prob1)
+    # Choose label with higher probability.
+    labels = np.zeros(len(classes), dtype=np.int_)
+    labels[idx] = 1
+
+    return classes, labels, prob1
+
+
 ################################################################################
 #
 # Optional functions. You can change or remove these functions and/or add new functions.
@@ -127,64 +170,19 @@ def run_challenge_model(model, data, recordings, verbose):
 ################################################################################
 
 # Save your trained model.
-def save_challenge_model(model_folder, classes, imputer, classifier):
-    d = {'classes': classes, 'imputer': imputer, 'classifier': classifier}
-    filename = os.path.join(model_folder, 'model.sav')
-    joblib.dump(d, filename, protocol=0)
+#def save_challenge_model(model_folder, classes, imputer, classifier):
+#    d = {'classes': classes, 'imputer': imputer, 'classifier': classifier}
+#    filename = os.path.join(model_folder, 'model.sav')
+#    joblib.dump(d, filename, protocol=0)
+    
+def save_challenge_model(model_folder, model, classes, m_name, mel_shape = (100, 313, 1)) :
+    os.makedirs(model_folder, exist_ok=True)
+    info_fnm = os.path.join(model_folder, 'desc.pk')
+    filename = os.path.join(model_folder, m_name + '_model.hdf5')
+    model.save(filename)
+    d = {'model': m_name, 'classes': classes, 'mel_shape': mel_shape, 'model_fnm': filename}    
+    with open(info_fnm, 'wb') as f:
+        pk.dump(d, f, pk.HIGHEST_PROTOCOL)
 
-# Extract features from the data.
-def get_features(data, recordings):
-    # Extract the age group and replace with the (approximate) number of months for the middle of the age group.
-    age_group = get_age(data)
-
-    if compare_strings(age_group, 'Neonate'):
-        age = 0.5
-    elif compare_strings(age_group, 'Infant'):
-        age = 6
-    elif compare_strings(age_group, 'Child'):
-        age = 6 * 12
-    elif compare_strings(age_group, 'Adolescent'):
-        age = 15 * 12
-    elif compare_strings(age_group, 'Young Adult'):
-        age = 20 * 12
-    else:
-        age = float('nan')
-
-    # Extract sex. Use one-hot encoding.
-    sex = get_sex(data)
-
-    sex_features = np.zeros(2, dtype=int)
-    if compare_strings(sex, 'Female'):
-        sex_features[0] = 1
-    elif compare_strings(sex, 'Male'):
-        sex_features[1] = 1
-
-    # Extract height and weight.
-    height = get_height(data)
-    weight = get_weight(data)
-
-    # Extract pregnancy status.
-    is_pregnant = get_pregnancy_status(data)
-
-    # Extract recording locations and data. Identify when a location is present, and compute the mean, variance, and skewness of
-    # each recording. If there are multiple recordings for one location, then extract features from the last recording.
-    locations = get_locations(data)
-
-    recording_locations = ['AV', 'MV', 'PV', 'TV', 'PhC']
-    num_recording_locations = len(recording_locations)
-    recording_features = np.zeros((num_recording_locations, 4), dtype=float)
-    num_locations = len(locations)
-    num_recordings = len(recordings)
-    if num_locations==num_recordings:
-        for i in range(num_locations):
-            for j in range(num_recording_locations):
-                if compare_strings(locations[i], recording_locations[j]) and np.size(recordings[i])>0:
-                    recording_features[j, 0] = 1
-                    recording_features[j, 1] = np.mean(recordings[i])
-                    recording_features[j, 2] = np.var(recordings[i])
-                    recording_features[j, 3] = sp.stats.skew(recordings[i])
-    recording_features = recording_features.flatten()
-
-    features = np.hstack(([age], sex_features, [height], [weight], [is_pregnant], recording_features))
-
-    return np.asarray(features, dtype=np.float32)
+        
+        
