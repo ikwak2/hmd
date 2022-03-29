@@ -100,44 +100,16 @@ def load_challenge_model(model_folder, verbose):
 
 # Run your trained model. This function is *required*. You should edit this function to add your code, but do *not* change the
 # arguments of this function.
-def run_challenge_model(model, data, recordings, verbose):
-    classes = model['classes']
-    imputer = model['imputer']
-    classifier = model['classifier']
-
-    if model['model'] == 'toy' :
-        model1 = get_toy(info_m['mel_shape'])
-    filename = os.path.join(model_folder, info_m['model'] + '_model.hdf5')
-    model.load_weights(filename)
-    
-    # Load features.
-    features = get_features(data, recordings)
-
-    # Impute missing data.
-    features = features.reshape(1, -1)
-    features = imputer.transform(features)
-
-    # Get classifier probabilities.
-    probabilities = classifier.predict_proba(features)
-    probabilities = np.asarray(probabilities, dtype=np.float32)[:, 0, 1]
-
-    # Choose label with higher probability.
-    labels = np.zeros(len(classes), dtype=np.int_)
-    idx = np.argmax(probabilities)
-    labels[idx] = 1
-
-    return classes, labels, probabilities
 
 def run_challenge_model(model, data, recordings, verbose):
     
     if model['model'] == 'toy' :
         model1 = get_toy(model['mel_shape'])
-    filename = os.path.join(model_folder, model['model'] + '_model.hdf5')
-    model1.load_weights(filename)
+    model1.load_weights(model['model_fnm'])
     
     classes = model['classes']
     # Load features.
-    features = get_feature_one(data, verbose)
+    features = get_feature_one(data, verbose = 0)
 
     features['mel1'] = []
     for i in range(len(recordings)) :
