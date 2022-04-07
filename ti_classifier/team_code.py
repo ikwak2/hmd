@@ -109,7 +109,7 @@ def train_challenge_model(data_folder, model_folder, verbose):
     features['hw'] = imputer.transform(features['hw'])
     
     
-    for iter_ in range(3):  # args.end_iter
+    for iter_ in range(15):  # args.end_iter
         start_time = time.time()
         running_loss = 0.0
         train_epoch_acc = 0.0
