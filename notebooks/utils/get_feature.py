@@ -2,6 +2,7 @@ import soundfile as sf
 import numpy as np
 import librosa
 from helper_code import *
+import math
 
 def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100):
 
@@ -143,7 +144,7 @@ def get_murmur_loc(data):
                 pass
     return murmur_loc
 
-def get_features_3lb(patient_files_trn) :
+def get_features_3lb(data_folder, patient_files_trn) :
     features = dict()
     features['id'] = []
     features['age'] = []
