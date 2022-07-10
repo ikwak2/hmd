@@ -1,0 +1,337 @@
+-------------
+0.1
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.137,0.225,0.526,14718.457
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.422,0.534,0.813,13436.288
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.341,0.000,0.069
+Accuracy,1.000,0.000,0.036
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.676,0.168
+Accuracy,0.949,0.097
+
+-------------
+0.15
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.234,0.340,0.574,13124.084
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.503,0.555,0.758,12187.710
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.372,0.000,0.331
+Accuracy,0.974,0.000,0.201
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.664,0.341
+Accuracy,0.857,0.237
+
+-------------
+0.2
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.312,0.455,0.612,11872.451
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.639,0.649,0.748,10950.558
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.409,0.000,0.528
+Accuracy,0.921,0.000,0.374
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.700,0.579
+Accuracy,0.796,0.495
+
+-------------
+0.25
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.370,0.550,0.660,12297.663
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.675,0.675,0.695,11879.982
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.461,0.000,0.648
+Accuracy,0.921,0.000,0.504
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.690,0.659
+Accuracy,0.704,0.645
+
+-------------
+0.3
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.414,0.634,0.671,14096.782
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.648,0.649,0.604,14003.185
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.504,0.000,0.739
+Accuracy,0.842,0.000,0.640
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.630,0.667
+Accuracy,0.582,0.720
+
+-------------
+0.35
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.459,0.707,0.709,15360.057
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.660,0.665,0.575,14917.930
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.577,0.000,0.802
+Accuracy,0.842,0.000,0.741
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.619,0.701
+Accuracy,0.531,0.806
+
+-------------
+0.4
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.467,0.728,0.687,16548.052
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.650,0.665,0.520,16521.880
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.580,0.000,0.821
+Accuracy,0.763,0.000,0.791
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.579,0.722
+Accuracy,0.449,0.892
+
+-------------
+0.45
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.512,0.791,0.720,17559.619
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.632,0.654,0.482,17555.878
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.667,0.000,0.868
+Accuracy,0.763,0.000,0.878
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.542,0.723
+Accuracy,0.398,0.925
+
+-------------
+0.5
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.519,0.801,0.714,18391.704
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.619,0.649,0.453,18388.678
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.683,0.000,0.874
+Accuracy,0.737,0.000,0.899
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.511,0.727
+Accuracy,0.357,0.957
+
+-------------
+0.55
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.536,0.822,0.714,19016.222
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.602,0.639,0.429,19015.676
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.720,0.000,0.887
+Accuracy,0.711,0.000,0.935
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.481,0.723
+Accuracy,0.327,0.968
+
+-------------
+0.6
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.550,0.838,0.722,19643.725
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.573,0.618,0.395,19852.593
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.750,0.000,0.899
+Accuracy,0.711,0.000,0.957
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.434,0.711
+Accuracy,0.286,0.968
+
+-------------
+0.65
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.543,0.832,0.709,19643.525
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.542,0.597,0.360,20689.573
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.732,0.000,0.896
+Accuracy,0.684,0.000,0.957
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.384,0.700
+Accuracy,0.245,0.968
+
+-------------
+0.7
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.536,0.827,0.695,19852.766
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.522,0.586,0.336,21316.814
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.714,0.000,0.893
+Accuracy,0.658,0.000,0.957
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.347,0.697
+Accuracy,0.214,0.978
+
+-------------
+0.75
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.774,0.601,0.535,0.832,0.677,20689.573
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.720,0.705,0.501,0.576,0.312,21943.414
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.876,0.638,0.809
+AUPRC,0.794,0.116,0.892
+F-measure,0.708,0.000,0.898
+Accuracy,0.605,0.000,0.978
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.720,0.720
+AUPRC,0.774,0.637
+F-measure,0.308,0.694
+Accuracy,0.184,0.989
+
+-------------
