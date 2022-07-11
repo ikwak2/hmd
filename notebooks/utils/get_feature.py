@@ -3,6 +3,7 @@ import numpy as np
 import librosa
 from helper_code import *
 import math
+import os, numpy as np, scipy as sp, scipy.io, scipy.io.wavfile
 
 def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100):
 
@@ -445,6 +446,7 @@ def get_feature_one(patient_data, verbose = 0) :
         print(label)
     return features
 
+
 def get_features_3lb_all(data_folder, patient_files_trn, 
                           samp_sec=20, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100,
                           filter_scale = 1, n_bins = 80, fmin = 10
@@ -459,6 +461,7 @@ def get_features_3lb_all(data_folder, patient_files_trn,
     features['mel1'] = []
     features['cqt1'] = []
     features['stft1'] = []
+    features['raw1'] = []
 #    labels = []
     mm_labels = []
     out_labels = []
@@ -484,12 +487,18 @@ def get_features_3lb_all(data_folder, patient_files_trn,
             features['id'].append(id1)
 
             # Extract melspec
-            mel1 = feature_extract_melspec(filename)[0]
+            mel1 = feature_extract_melspec(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
+                                           win_length = win_length, n_mels = n_mels)[0]
             features['mel1'].append(mel1)
-            mel2 = feature_extract_cqt(filename)[0]
+            mel2 = feature_extract_cqt(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, filter_scale = filter_scale, 
+                                        n_bins = n_bins, fmin = fmin)[0]
             features['cqt1'].append(mel2)
-            mel3 = feature_extract_stft(filename)[0]
+            mel3 = feature_extract_stft(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
+                                       win_length = win_length)[0]
             features['stft1'].append(mel3)
+
+            frequency1, recording1 = sp.io.wavfile.read(filename)
+            features['raw1'].append(recording1)
             
             # Extract age_group
             age_group = get_age(current_patient_data)
@@ -572,20 +581,23 @@ def get_features_3lb_all(data_folder, patient_files_trn,
     for i in range(len(features['mel1'])) :
         features['mel1'][i] = features['mel1'][i].reshape(M,N,1)
     print("melspec: ", M,N)
+    mel_input_shape = (M,N,1)
         
     M, N = features['cqt1'][i].shape
     for i in range(len(features['cqt1'])) :
         features['cqt1'][i] = features['cqt1'][i].reshape(M,N,1)
     print("cqt: ", M,N)
+    cqt_input_shape = (M,N,1)
 
     M, N = features['stft1'][i].shape
     for i in range(len(features['stft1'])) :
         features['stft1'][i] = features['stft1'][i].reshape(M,N,1)
     print("stft: ", M,N)
+    stft_input_shape = (M,N,1)
         
     for k1 in features.keys() :
         features[k1] = np.array(features[k1])
     
     mm_labels = np.array(mm_labels)
     out_labels = np.array(out_labels)
-    return features, mm_labels, out_labels
+    return features, mm_labels, out_labels, mel_input_shape, cqt_input_shape, stft_input_shape
