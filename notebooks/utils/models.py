@@ -6,6 +6,7 @@ from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, BatchNormalizat
 from tensorflow.keras.layers import Convolution2D, GlobalAveragePooling2D, MaxPool2D, ZeroPadding2D
 from tensorflow.keras.layers import add,concatenate
 from tensorflow.keras.activations import relu, softmax, swish
+import tensorflow
 
 def get_toy(mel_input_shape):
         # Create a towy model.

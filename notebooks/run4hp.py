@@ -14,6 +14,7 @@ from helper_code import *
 from get_feature import *
 from models import *
 from Generator0 import *
+import tensorflow as tf
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
