@@ -602,7 +602,7 @@ def get_features_3lb_all_tmp(data_folder, patient_files_trn,
     out_labels = np.array(out_labels)
     return features, mm_labels, out_labels, mel_input_shape, cqt_input_shape, stft_input_shape
 
-def get_features_3lb_all_ord_tmp(data_folder, patient_files_trn, po = .5,
+def get_features_3lb_all_ord_tmp(data_folder, patient_files_trn, po = .3,
                           samp_sec=20, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100,
                           filter_scale = 1, n_bins = 80, fmin = 10
                          ) :
@@ -756,7 +756,7 @@ def get_features_3lb_all_ord_tmp(data_folder, patient_files_trn, po = .5,
     return features, mm_labels, out_labels, mel_input_shape, cqt_input_shape, stft_input_shape
 
 
-def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .5,
+def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
                           samp_sec=20, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100,
                              filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,
                              use_mel = True, use_cqt = False, use_stft = False, use_raw = False
