@@ -151,35 +151,52 @@ def run_challenge_model(model, data, recordings, verbose):
     filter_scale = model['filter_scale']
     n_bins = model['n_bins']
     fmin = model['fmin']
+    use_mel = model['use_mel']
+    use_cqt = model['use_cqt']
+    use_stft = model['use_stft']
+    use_raw = model['use_raw']
     
     features['mel1'] = []
     for i in range(len(recordings)) :
-        mel1 = feature_extract_melspec(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
+        if use_mel :
+            mel1 = feature_extract_melspec(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
                                            win_length = win_length, n_mels = n_mels)[0]
+        else :
+            mel1 = np.zeros( (1,1) )
         features['mel1'].append(mel1)
     M, N = features['mel1'][0].shape
-    for i in range(len(features['mel1'])) :
-        features['mel1'][i] = features['mel1'][i].reshape(M,N,1)   
+
+    if use mel :
+        for i in range(len(features['mel1'])) :
+            features['mel1'][i] = features['mel1'][i].reshape(M,N,1)
     features['mel1'] = np.array(features['mel1'])
 
     features['cqt1'] = []
     for i in range(len(recordings)) :
-        mel1 = feature_extract_cqt(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, filter_scale = filter_scale, 
+        if use_cqt :
+            mel1 = feature_extract_cqt(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, filter_scale = filter_scale, 
                                         n_bins = n_bins, fmin = fmin)[0]
+        else :
+            mel1 = np.zeros( (1,1))
         features['cqt1'].append(mel1)
     M, N = features['cqt1'][0].shape
-    for i in range(len(features['cqt1'])) :
-        features['cqt1'][i] = features['cqt1'][i].reshape(M,N,1)   
+    if use_cqt :
+        for i in range(len(features['cqt1'])) :
+            features['cqt1'][i] = features['cqt1'][i].reshape(M,N,1)   
     features['cqt1'] = np.array(features['cqt1'])
 
     features['stft1'] = []
     for i in range(len(recordings)) :
-        mel1 = feature_extract_stft(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
+        if use_stft :
+            mel1 = feature_extract_stft(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
                                        win_length = win_length)[0]
+        else :
+            mel1 = np.zeros( (1,1) )
         features['stft1'].append(mel1)
     M, N = features['stft1'][0].shape
-    for i in range(len(features['stft1'])) :
-        features['stft1'][i] = features['stft1'][i].reshape(M,N,1)           
+    if use_stft :
+        for i in range(len(features['stft1'])) :
+            features['stft1'][i] = features['stft1'][i].reshape(M,N,1)           
     features['stft1'] = np.array(features['stft1'])
 
     #    print(features)
