@@ -39,6 +39,10 @@ df1[df1.use_mel == True][df1.samp_sec==30][['min_cost', 'min_th', 'max_wc','max_
 
 df1[df1.use_mel == True][df1.samp_sec==40][['min_cost', 'min_th', 'max_wc','max_th','mm_weighted_accuracy', 'out_cost']]
 
+
+df1.to_csv("res.csv")
+df1.iloc[0,]
+
 012
 512 256  .78
 9-11

@@ -1892,8 +1892,8 @@ for i in range(3) :
     params_feature = {'samp_sec': 20,
                   #### melspec, stft 피쳐 옵션들  
                   'pre_emphasis': 0,
-                  'hop_length': 2048,
-                  'win_length': 1024,
+                  'hop_length': 1024,
+                  'win_length': 2048,
                   'n_mels': 100,
                   #### cqt 피쳐 옵션들  
                   'filter_scale': 1,

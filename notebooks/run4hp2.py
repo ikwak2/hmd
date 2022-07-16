@@ -154,7 +154,7 @@ def run_challenge_model(model, data, recordings, verbose):
     use_mel = model['use_mel']
     use_cqt = model['use_cqt']
     use_stft = model['use_stft']
-    use_raw = model['use_raw']
+#    use_raw = model['use_raw']
     trim = model['trim']
     
     features['mel1'] = []
@@ -452,6 +452,1356 @@ for i in range(3) :
     
     with open(fnm, 'wb') as f:
         pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
+
+
+
+
+
+
+
+####### trim 10 실험
+
+
+for i in range(3) :
+    model_folder = 'lcnn_hp_'+ str(i)
+    output_folder = '/home/ubuntu/hmd/notebooks/tmp/out_lcnn_hp_'+ str(i)
+
+    params_feature = {'samp_sec': 20,
+                  #### melspec, stft 피쳐 옵션들  
+                  'pre_emphasis': 0,
+                  'hop_length': 256,
+                  'win_length':512,
+                  'n_mels': 100,
+                  #### cqt 피쳐 옵션들  
+                  'filter_scale': 1,
+                  'n_bins': 80,
+                      'fmin': 10,
+                    ### 사용할 피쳐 지정
+                      'trim' : 10, # 앞뒤 얼마나 자를지? 4000 이면 1초
+                      'use_mel' : True,
+                      'use_cqt' : False,
+                      'use_stft' : False
+    }
+    mm_weight = 3
+    oo_weight = 3
+    ord1 = True
+
+    use_mel = params_feature['use_mel']
+    use_cqt = params_feature['use_cqt']
+    use_stft = params_feature['use_stft']
+    
+    
+    if ord1 :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    else :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all(test_folder, patient_files_test, **params_feature)
+
+    params_feature['ord1'] = ord1
+        
+
+    model1 = get_LCNN_o_1(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+    model2 = get_LCNN_2(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+              #          'highpass': [.5, [78,79,80,81,82,83,84,85]]
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+              #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             mm_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: mm_weight, 1: 1.} 
+    
+    model1.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             mm_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(mm_lbs_trn)/64),
+                           class_weight=class_weight, 
+                             epochs = n_epoch)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+            'highpass': [.5, [78,79,80,81,82,83,84,85]],
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+            #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             out_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: oo_weight, 1: 1.} 
+    
+    model2.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             out_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(out_lbs_trn)/64),
+                             epochs = n_epoch)
+
+
+    params_feature['mel_shape'] = mel_input_shape
+    params_feature['cqt_shape'] = cqt_input_shape
+    params_feature['stft_shape'] = stft_input_shape
+
+    params_feature['use_mel'] = use_mel
+    params_feature['use_cqt'] = use_cqt
+    params_feature['use_stft'] = use_stft
+    
+    save_challenge_model(model_folder, model1, model2, m_name1 = 'lcnn1', m_name2 = 'lcnn2', param_feature = params_feature)
+    
+    run_model(model_folder, test_folder, output_folder, allow_failures = True, verbose = 1)
+
+    murmur_scores, outcome_scores = evaluate_model(test_folder, output_folder)
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = murmur_scores
+    murmur_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    murmur_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    params_feature['mm_weighted_accuracy'] = weighted_accuracy
+    
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = outcome_scores
+    outcome_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    outcome_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    output_string = '#Murmur scores\n' + murmur_output_string + '\n#Outcome scores\n' + outcome_output_string \
+    + '\n#Murmur scores (per class)\n' + murmur_class_output_string + '\n#Outcome scores (per class)\n' + outcome_class_output_string
+    
+    params_feature['out_cost'] = cost
+
+    label_folder = test_folder
+    murmur_classes = ['Present', 'Unknown', 'Absent']
+    outcome_classes = ['Abnormal', 'Normal']
+
+    # Load and parse label and model output files.
+    label_files, output_files = find_challenge_files(label_folder, output_folder)
+    murmur_labels = load_murmurs(label_files, murmur_classes)
+    murmur_binary_outputs, murmur_scalar_outputs = load_classifier_outputs(output_files, murmur_classes)
+    outcome_labels = load_outcomes(label_files, outcome_classes)
+    outcome_binary_outputs, outcome_scalar_outputs = load_classifier_outputs(output_files, outcome_classes)
+    
+    max_wc = 0
+    max_th = 0
+    min_cost = 100000
+    min_th = 1000
+    for th1 in [0.01, 0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8] :
+        murmur_binary_outputs[:,0] = murmur_scalar_outputs[:,0] > th1
+        murmur_binary_outputs[:,2] = murmur_scalar_outputs[:,2] > 1 - th1
+        outcome_binary_outputs[:,0] = outcome_scalar_outputs[:,0] > th1
+        outcome_binary_outputs[:,1] = outcome_scalar_outputs[:,1] > 1 - th1
+        # For each patient, set the 'Present' or 'Abnormal' class to positive if no class is positive or if multiple classes are positive.
+        murmur_labels = enforce_positives(murmur_labels, murmur_classes, 'Present')
+        murmur_binary_outputs = enforce_positives(murmur_binary_outputs, murmur_classes, 'Present')
+        outcome_labels = enforce_positives(outcome_labels, outcome_classes, 'Abnormal')
+        outcome_binary_outputs = enforce_positives(outcome_binary_outputs, outcome_classes, 'Abnormal')
+        # Evaluate the murmur model by comparing the labels and model outputs.
+        murmur_auroc, murmur_auprc, murmur_auroc_classes, murmur_auprc_classes = compute_auc(murmur_labels, murmur_scalar_outputs)
+        murmur_f_measure, murmur_f_measure_classes = compute_f_measure(murmur_labels, murmur_binary_outputs)
+        murmur_accuracy, murmur_accuracy_classes = compute_accuracy(murmur_labels, murmur_binary_outputs)
+        murmur_weighted_accuracy = compute_weighted_accuracy(murmur_labels, murmur_binary_outputs, murmur_classes) # This is the murmur scoring metric.
+
+        if murmur_weighted_accuracy > max_wc :
+            max_wc = murmur_weighted_accuracy
+            max_th = th1
+
+        outcome_auroc, outcome_auprc, outcome_auroc_classes, outcome_auprc_classes = compute_auc(outcome_labels, outcome_scalar_outputs)
+        outcome_f_measure, outcome_f_measure_classes = compute_f_measure(outcome_labels, outcome_binary_outputs)
+        outcome_accuracy, outcome_accuracy_classes = compute_accuracy(outcome_labels, outcome_binary_outputs)
+        outcome_weighted_accuracy = compute_weighted_accuracy(outcome_labels, outcome_binary_outputs, outcome_classes)
+        outcome_cost = compute_cost(outcome_labels, outcome_binary_outputs, outcome_classes, outcome_classes) # This is the clinical outcomes scoring metric.
+
+        if outcome_cost < min_cost :
+            min_cost = outcome_cost
+            min_th = th1
+
+    params_feature['max_wc'] = max_wc
+    params_feature['min_cost'] = min_cost
+    params_feature['max_th'] = max_th
+    params_feature['min_th'] = min_th
+
+    tnow = datetime.datetime.now()
+    fnm = 'res2/rec'+ str(tnow)+'.pk'
+    
+    with open(fnm, 'wb') as f:
+        pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
+
+
+
+
+####### trim 2000 실험
+
+
+for i in range(3) :
+    model_folder = 'lcnn_hp_'+ str(i)
+    output_folder = '/home/ubuntu/hmd/notebooks/tmp/out_lcnn_hp_'+ str(i)
+
+    params_feature = {'samp_sec': 20,
+                  #### melspec, stft 피쳐 옵션들  
+                  'pre_emphasis': 0,
+                  'hop_length': 256,
+                  'win_length':512,
+                  'n_mels': 100,
+                  #### cqt 피쳐 옵션들  
+                  'filter_scale': 1,
+                  'n_bins': 80,
+                      'fmin': 10,
+                    ### 사용할 피쳐 지정
+                      'trim' : 2000, # 앞뒤 얼마나 자를지? 4000 이면 1초
+                      'use_mel' : True,
+                      'use_cqt' : False,
+                      'use_stft' : False
+    }
+    mm_weight = 3
+    oo_weight = 3
+    ord1 = True
+
+    use_mel = params_feature['use_mel']
+    use_cqt = params_feature['use_cqt']
+    use_stft = params_feature['use_stft']
+    
+    
+    if ord1 :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    else :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all(test_folder, patient_files_test, **params_feature)
+
+    params_feature['ord1'] = ord1
+        
+
+    model1 = get_LCNN_o_1(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+    model2 = get_LCNN_2(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+              #          'highpass': [.5, [78,79,80,81,82,83,84,85]]
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+              #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             mm_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: mm_weight, 1: 1.} 
+    
+    model1.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             mm_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(mm_lbs_trn)/64),
+                           class_weight=class_weight, 
+                             epochs = n_epoch)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+            'highpass': [.5, [78,79,80,81,82,83,84,85]],
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+            #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             out_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: oo_weight, 1: 1.} 
+    
+    model2.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             out_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(out_lbs_trn)/64),
+                             epochs = n_epoch)
+
+
+    params_feature['mel_shape'] = mel_input_shape
+    params_feature['cqt_shape'] = cqt_input_shape
+    params_feature['stft_shape'] = stft_input_shape
+
+    params_feature['use_mel'] = use_mel
+    params_feature['use_cqt'] = use_cqt
+    params_feature['use_stft'] = use_stft
+    
+    save_challenge_model(model_folder, model1, model2, m_name1 = 'lcnn1', m_name2 = 'lcnn2', param_feature = params_feature)
+    
+    run_model(model_folder, test_folder, output_folder, allow_failures = True, verbose = 1)
+
+    murmur_scores, outcome_scores = evaluate_model(test_folder, output_folder)
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = murmur_scores
+    murmur_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    murmur_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    params_feature['mm_weighted_accuracy'] = weighted_accuracy
+    
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = outcome_scores
+    outcome_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    outcome_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    output_string = '#Murmur scores\n' + murmur_output_string + '\n#Outcome scores\n' + outcome_output_string \
+    + '\n#Murmur scores (per class)\n' + murmur_class_output_string + '\n#Outcome scores (per class)\n' + outcome_class_output_string
+    
+    params_feature['out_cost'] = cost
+
+    label_folder = test_folder
+    murmur_classes = ['Present', 'Unknown', 'Absent']
+    outcome_classes = ['Abnormal', 'Normal']
+
+    # Load and parse label and model output files.
+    label_files, output_files = find_challenge_files(label_folder, output_folder)
+    murmur_labels = load_murmurs(label_files, murmur_classes)
+    murmur_binary_outputs, murmur_scalar_outputs = load_classifier_outputs(output_files, murmur_classes)
+    outcome_labels = load_outcomes(label_files, outcome_classes)
+    outcome_binary_outputs, outcome_scalar_outputs = load_classifier_outputs(output_files, outcome_classes)
+    
+    max_wc = 0
+    max_th = 0
+    min_cost = 100000
+    min_th = 1000
+    for th1 in [0.01, 0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8] :
+        murmur_binary_outputs[:,0] = murmur_scalar_outputs[:,0] > th1
+        murmur_binary_outputs[:,2] = murmur_scalar_outputs[:,2] > 1 - th1
+        outcome_binary_outputs[:,0] = outcome_scalar_outputs[:,0] > th1
+        outcome_binary_outputs[:,1] = outcome_scalar_outputs[:,1] > 1 - th1
+        # For each patient, set the 'Present' or 'Abnormal' class to positive if no class is positive or if multiple classes are positive.
+        murmur_labels = enforce_positives(murmur_labels, murmur_classes, 'Present')
+        murmur_binary_outputs = enforce_positives(murmur_binary_outputs, murmur_classes, 'Present')
+        outcome_labels = enforce_positives(outcome_labels, outcome_classes, 'Abnormal')
+        outcome_binary_outputs = enforce_positives(outcome_binary_outputs, outcome_classes, 'Abnormal')
+        # Evaluate the murmur model by comparing the labels and model outputs.
+        murmur_auroc, murmur_auprc, murmur_auroc_classes, murmur_auprc_classes = compute_auc(murmur_labels, murmur_scalar_outputs)
+        murmur_f_measure, murmur_f_measure_classes = compute_f_measure(murmur_labels, murmur_binary_outputs)
+        murmur_accuracy, murmur_accuracy_classes = compute_accuracy(murmur_labels, murmur_binary_outputs)
+        murmur_weighted_accuracy = compute_weighted_accuracy(murmur_labels, murmur_binary_outputs, murmur_classes) # This is the murmur scoring metric.
+
+        if murmur_weighted_accuracy > max_wc :
+            max_wc = murmur_weighted_accuracy
+            max_th = th1
+
+        outcome_auroc, outcome_auprc, outcome_auroc_classes, outcome_auprc_classes = compute_auc(outcome_labels, outcome_scalar_outputs)
+        outcome_f_measure, outcome_f_measure_classes = compute_f_measure(outcome_labels, outcome_binary_outputs)
+        outcome_accuracy, outcome_accuracy_classes = compute_accuracy(outcome_labels, outcome_binary_outputs)
+        outcome_weighted_accuracy = compute_weighted_accuracy(outcome_labels, outcome_binary_outputs, outcome_classes)
+        outcome_cost = compute_cost(outcome_labels, outcome_binary_outputs, outcome_classes, outcome_classes) # This is the clinical outcomes scoring metric.
+
+        if outcome_cost < min_cost :
+            min_cost = outcome_cost
+            min_th = th1
+
+    params_feature['max_wc'] = max_wc
+    params_feature['min_cost'] = min_cost
+    params_feature['max_th'] = max_th
+    params_feature['min_th'] = min_th
+
+    tnow = datetime.datetime.now()
+    fnm = 'res2/rec'+ str(tnow)+'.pk'
+    
+    with open(fnm, 'wb') as f:
+        pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
+
+        
+
+
+
+
+
+####### win_length 256
+
+
+for i in range(3) :
+    model_folder = 'lcnn_hp_'+ str(i)
+    output_folder = '/home/ubuntu/hmd/notebooks/tmp/out_lcnn_hp_'+ str(i)
+
+    params_feature = {'samp_sec': 20,
+                  #### melspec, stft 피쳐 옵션들  
+                  'pre_emphasis': 0,
+                  'hop_length': 128,
+                  'win_length':256,
+                  'n_mels': 100,
+                  #### cqt 피쳐 옵션들  
+                  'filter_scale': 1,
+                  'n_bins': 80,
+                      'fmin': 10,
+                    ### 사용할 피쳐 지정
+                      'trim' : 4000, # 앞뒤 얼마나 자를지? 4000 이면 1초
+                      'use_mel' : True,
+                      'use_cqt' : False,
+                      'use_stft' : False
+    }
+    mm_weight = 3
+    oo_weight = 3
+    ord1 = True
+
+    use_mel = params_feature['use_mel']
+    use_cqt = params_feature['use_cqt']
+    use_stft = params_feature['use_stft']
+    
+    
+    if ord1 :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    else :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all(test_folder, patient_files_test, **params_feature)
+
+    params_feature['ord1'] = ord1
+        
+
+    model1 = get_LCNN_o_1(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+    model2 = get_LCNN_2(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+              #          'highpass': [.5, [78,79,80,81,82,83,84,85]]
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+              #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             mm_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: mm_weight, 1: 1.} 
+    
+    model1.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             mm_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(mm_lbs_trn)/64),
+                           class_weight=class_weight, 
+                             epochs = n_epoch)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+            'highpass': [.5, [78,79,80,81,82,83,84,85]],
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+            #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             out_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: oo_weight, 1: 1.} 
+    
+    model2.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             out_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(out_lbs_trn)/64),
+                             epochs = n_epoch)
+
+
+    params_feature['mel_shape'] = mel_input_shape
+    params_feature['cqt_shape'] = cqt_input_shape
+    params_feature['stft_shape'] = stft_input_shape
+
+    params_feature['use_mel'] = use_mel
+    params_feature['use_cqt'] = use_cqt
+    params_feature['use_stft'] = use_stft
+    
+    save_challenge_model(model_folder, model1, model2, m_name1 = 'lcnn1', m_name2 = 'lcnn2', param_feature = params_feature)
+    
+    run_model(model_folder, test_folder, output_folder, allow_failures = True, verbose = 1)
+
+    murmur_scores, outcome_scores = evaluate_model(test_folder, output_folder)
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = murmur_scores
+    murmur_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    murmur_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    params_feature['mm_weighted_accuracy'] = weighted_accuracy
+    
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = outcome_scores
+    outcome_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    outcome_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    output_string = '#Murmur scores\n' + murmur_output_string + '\n#Outcome scores\n' + outcome_output_string \
+    + '\n#Murmur scores (per class)\n' + murmur_class_output_string + '\n#Outcome scores (per class)\n' + outcome_class_output_string
+    
+    params_feature['out_cost'] = cost
+
+    label_folder = test_folder
+    murmur_classes = ['Present', 'Unknown', 'Absent']
+    outcome_classes = ['Abnormal', 'Normal']
+
+    # Load and parse label and model output files.
+    label_files, output_files = find_challenge_files(label_folder, output_folder)
+    murmur_labels = load_murmurs(label_files, murmur_classes)
+    murmur_binary_outputs, murmur_scalar_outputs = load_classifier_outputs(output_files, murmur_classes)
+    outcome_labels = load_outcomes(label_files, outcome_classes)
+    outcome_binary_outputs, outcome_scalar_outputs = load_classifier_outputs(output_files, outcome_classes)
+    
+    max_wc = 0
+    max_th = 0
+    min_cost = 100000
+    min_th = 1000
+    for th1 in [0.01, 0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8] :
+        murmur_binary_outputs[:,0] = murmur_scalar_outputs[:,0] > th1
+        murmur_binary_outputs[:,2] = murmur_scalar_outputs[:,2] > 1 - th1
+        outcome_binary_outputs[:,0] = outcome_scalar_outputs[:,0] > th1
+        outcome_binary_outputs[:,1] = outcome_scalar_outputs[:,1] > 1 - th1
+        # For each patient, set the 'Present' or 'Abnormal' class to positive if no class is positive or if multiple classes are positive.
+        murmur_labels = enforce_positives(murmur_labels, murmur_classes, 'Present')
+        murmur_binary_outputs = enforce_positives(murmur_binary_outputs, murmur_classes, 'Present')
+        outcome_labels = enforce_positives(outcome_labels, outcome_classes, 'Abnormal')
+        outcome_binary_outputs = enforce_positives(outcome_binary_outputs, outcome_classes, 'Abnormal')
+        # Evaluate the murmur model by comparing the labels and model outputs.
+        murmur_auroc, murmur_auprc, murmur_auroc_classes, murmur_auprc_classes = compute_auc(murmur_labels, murmur_scalar_outputs)
+        murmur_f_measure, murmur_f_measure_classes = compute_f_measure(murmur_labels, murmur_binary_outputs)
+        murmur_accuracy, murmur_accuracy_classes = compute_accuracy(murmur_labels, murmur_binary_outputs)
+        murmur_weighted_accuracy = compute_weighted_accuracy(murmur_labels, murmur_binary_outputs, murmur_classes) # This is the murmur scoring metric.
+
+        if murmur_weighted_accuracy > max_wc :
+            max_wc = murmur_weighted_accuracy
+            max_th = th1
+
+        outcome_auroc, outcome_auprc, outcome_auroc_classes, outcome_auprc_classes = compute_auc(outcome_labels, outcome_scalar_outputs)
+        outcome_f_measure, outcome_f_measure_classes = compute_f_measure(outcome_labels, outcome_binary_outputs)
+        outcome_accuracy, outcome_accuracy_classes = compute_accuracy(outcome_labels, outcome_binary_outputs)
+        outcome_weighted_accuracy = compute_weighted_accuracy(outcome_labels, outcome_binary_outputs, outcome_classes)
+        outcome_cost = compute_cost(outcome_labels, outcome_binary_outputs, outcome_classes, outcome_classes) # This is the clinical outcomes scoring metric.
+
+        if outcome_cost < min_cost :
+            min_cost = outcome_cost
+            min_th = th1
+
+    params_feature['max_wc'] = max_wc
+    params_feature['min_cost'] = min_cost
+    params_feature['max_th'] = max_th
+    params_feature['min_th'] = min_th
+
+    tnow = datetime.datetime.now()
+    fnm = 'res2/rec'+ str(tnow)+'.pk'
+    
+    with open(fnm, 'wb') as f:
+        pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
+
+
+
+        
+####### win_length 128
+
+
+for i in range(3) :
+    model_folder = 'lcnn_hp_'+ str(i)
+    output_folder = '/home/ubuntu/hmd/notebooks/tmp/out_lcnn_hp_'+ str(i)
+
+    params_feature = {'samp_sec': 20,
+                  #### melspec, stft 피쳐 옵션들  
+                  'pre_emphasis': 0,
+                  'hop_length': 64,
+                  'win_length':128,
+                  'n_mels': 100,
+                  #### cqt 피쳐 옵션들  
+                  'filter_scale': 1,
+                  'n_bins': 80,
+                      'fmin': 10,
+                    ### 사용할 피쳐 지정
+                      'trim' : 4000, # 앞뒤 얼마나 자를지? 4000 이면 1초
+                      'use_mel' : True,
+                      'use_cqt' : False,
+                      'use_stft' : False
+    }
+    mm_weight = 3
+    oo_weight = 3
+    ord1 = True
+
+    use_mel = params_feature['use_mel']
+    use_cqt = params_feature['use_cqt']
+    use_stft = params_feature['use_stft']
+    
+    
+    if ord1 :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    else :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all(test_folder, patient_files_test, **params_feature)
+
+    params_feature['ord1'] = ord1
+        
+
+    model1 = get_LCNN_o_1(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+    model2 = get_LCNN_2(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+              #          'highpass': [.5, [78,79,80,81,82,83,84,85]]
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+              #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             mm_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: mm_weight, 1: 1.} 
+    
+    model1.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             mm_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(mm_lbs_trn)/64),
+                           class_weight=class_weight, 
+                             epochs = n_epoch)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+            'highpass': [.5, [78,79,80,81,82,83,84,85]],
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+            #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             out_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: oo_weight, 1: 1.} 
+    
+    model2.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             out_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(out_lbs_trn)/64),
+                             epochs = n_epoch)
+
+
+    params_feature['mel_shape'] = mel_input_shape
+    params_feature['cqt_shape'] = cqt_input_shape
+    params_feature['stft_shape'] = stft_input_shape
+
+    params_feature['use_mel'] = use_mel
+    params_feature['use_cqt'] = use_cqt
+    params_feature['use_stft'] = use_stft
+    
+    save_challenge_model(model_folder, model1, model2, m_name1 = 'lcnn1', m_name2 = 'lcnn2', param_feature = params_feature)
+    
+    run_model(model_folder, test_folder, output_folder, allow_failures = True, verbose = 1)
+
+    murmur_scores, outcome_scores = evaluate_model(test_folder, output_folder)
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = murmur_scores
+    murmur_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    murmur_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    params_feature['mm_weighted_accuracy'] = weighted_accuracy
+    
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = outcome_scores
+    outcome_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    outcome_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    output_string = '#Murmur scores\n' + murmur_output_string + '\n#Outcome scores\n' + outcome_output_string \
+    + '\n#Murmur scores (per class)\n' + murmur_class_output_string + '\n#Outcome scores (per class)\n' + outcome_class_output_string
+    
+    params_feature['out_cost'] = cost
+
+    label_folder = test_folder
+    murmur_classes = ['Present', 'Unknown', 'Absent']
+    outcome_classes = ['Abnormal', 'Normal']
+
+    # Load and parse label and model output files.
+    label_files, output_files = find_challenge_files(label_folder, output_folder)
+    murmur_labels = load_murmurs(label_files, murmur_classes)
+    murmur_binary_outputs, murmur_scalar_outputs = load_classifier_outputs(output_files, murmur_classes)
+    outcome_labels = load_outcomes(label_files, outcome_classes)
+    outcome_binary_outputs, outcome_scalar_outputs = load_classifier_outputs(output_files, outcome_classes)
+    
+    max_wc = 0
+    max_th = 0
+    min_cost = 100000
+    min_th = 1000
+    for th1 in [0.01, 0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8] :
+        murmur_binary_outputs[:,0] = murmur_scalar_outputs[:,0] > th1
+        murmur_binary_outputs[:,2] = murmur_scalar_outputs[:,2] > 1 - th1
+        outcome_binary_outputs[:,0] = outcome_scalar_outputs[:,0] > th1
+        outcome_binary_outputs[:,1] = outcome_scalar_outputs[:,1] > 1 - th1
+        # For each patient, set the 'Present' or 'Abnormal' class to positive if no class is positive or if multiple classes are positive.
+        murmur_labels = enforce_positives(murmur_labels, murmur_classes, 'Present')
+        murmur_binary_outputs = enforce_positives(murmur_binary_outputs, murmur_classes, 'Present')
+        outcome_labels = enforce_positives(outcome_labels, outcome_classes, 'Abnormal')
+        outcome_binary_outputs = enforce_positives(outcome_binary_outputs, outcome_classes, 'Abnormal')
+        # Evaluate the murmur model by comparing the labels and model outputs.
+        murmur_auroc, murmur_auprc, murmur_auroc_classes, murmur_auprc_classes = compute_auc(murmur_labels, murmur_scalar_outputs)
+        murmur_f_measure, murmur_f_measure_classes = compute_f_measure(murmur_labels, murmur_binary_outputs)
+        murmur_accuracy, murmur_accuracy_classes = compute_accuracy(murmur_labels, murmur_binary_outputs)
+        murmur_weighted_accuracy = compute_weighted_accuracy(murmur_labels, murmur_binary_outputs, murmur_classes) # This is the murmur scoring metric.
+
+        if murmur_weighted_accuracy > max_wc :
+            max_wc = murmur_weighted_accuracy
+            max_th = th1
+
+        outcome_auroc, outcome_auprc, outcome_auroc_classes, outcome_auprc_classes = compute_auc(outcome_labels, outcome_scalar_outputs)
+        outcome_f_measure, outcome_f_measure_classes = compute_f_measure(outcome_labels, outcome_binary_outputs)
+        outcome_accuracy, outcome_accuracy_classes = compute_accuracy(outcome_labels, outcome_binary_outputs)
+        outcome_weighted_accuracy = compute_weighted_accuracy(outcome_labels, outcome_binary_outputs, outcome_classes)
+        outcome_cost = compute_cost(outcome_labels, outcome_binary_outputs, outcome_classes, outcome_classes) # This is the clinical outcomes scoring metric.
+
+        if outcome_cost < min_cost :
+            min_cost = outcome_cost
+            min_th = th1
+
+    params_feature['max_wc'] = max_wc
+    params_feature['min_cost'] = min_cost
+    params_feature['max_th'] = max_th
+    params_feature['min_th'] = min_th
+
+    tnow = datetime.datetime.now()
+    fnm = 'res2/rec'+ str(tnow)+'.pk'
+    
+    with open(fnm, 'wb') as f:
+        pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
+
+
+
+
+
+
+####### win_length 800
+
+
+for i in range(3) :
+    model_folder = 'lcnn_hp_'+ str(i)
+    output_folder = '/home/ubuntu/hmd/notebooks/tmp/out_lcnn_hp_'+ str(i)
+
+    params_feature = {'samp_sec': 20,
+                  #### melspec, stft 피쳐 옵션들  
+                  'pre_emphasis': 0,
+                  'hop_length': 400,
+                  'win_length':800,
+                  'n_mels': 100,
+                  #### cqt 피쳐 옵션들  
+                  'filter_scale': 1,
+                  'n_bins': 80,
+                      'fmin': 10,
+                    ### 사용할 피쳐 지정
+                      'trim' : 4000, # 앞뒤 얼마나 자를지? 4000 이면 1초
+                      'use_mel' : True,
+                      'use_cqt' : False,
+                      'use_stft' : False
+    }
+    mm_weight = 3
+    oo_weight = 3
+    ord1 = True
+
+    use_mel = params_feature['use_mel']
+    use_cqt = params_feature['use_cqt']
+    use_stft = params_feature['use_stft']
+    
+    
+    if ord1 :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    else :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all(test_folder, patient_files_test, **params_feature)
+
+    params_feature['ord1'] = ord1
+        
+
+    model1 = get_LCNN_o_1(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+    model2 = get_LCNN_2(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+              #          'highpass': [.5, [78,79,80,81,82,83,84,85]]
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+              #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             mm_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: mm_weight, 1: 1.} 
+    
+    model1.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             mm_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(mm_lbs_trn)/64),
+                           class_weight=class_weight, 
+                             epochs = n_epoch)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+            'highpass': [.5, [78,79,80,81,82,83,84,85]],
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+            #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             out_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: oo_weight, 1: 1.} 
+    
+    model2.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             out_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(out_lbs_trn)/64),
+                             epochs = n_epoch)
+
+
+    params_feature['mel_shape'] = mel_input_shape
+    params_feature['cqt_shape'] = cqt_input_shape
+    params_feature['stft_shape'] = stft_input_shape
+
+    params_feature['use_mel'] = use_mel
+    params_feature['use_cqt'] = use_cqt
+    params_feature['use_stft'] = use_stft
+    
+    save_challenge_model(model_folder, model1, model2, m_name1 = 'lcnn1', m_name2 = 'lcnn2', param_feature = params_feature)
+    
+    run_model(model_folder, test_folder, output_folder, allow_failures = True, verbose = 1)
+
+    murmur_scores, outcome_scores = evaluate_model(test_folder, output_folder)
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = murmur_scores
+    murmur_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    murmur_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    params_feature['mm_weighted_accuracy'] = weighted_accuracy
+    
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = outcome_scores
+    outcome_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    outcome_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    output_string = '#Murmur scores\n' + murmur_output_string + '\n#Outcome scores\n' + outcome_output_string \
+    + '\n#Murmur scores (per class)\n' + murmur_class_output_string + '\n#Outcome scores (per class)\n' + outcome_class_output_string
+    
+    params_feature['out_cost'] = cost
+
+    label_folder = test_folder
+    murmur_classes = ['Present', 'Unknown', 'Absent']
+    outcome_classes = ['Abnormal', 'Normal']
+
+    # Load and parse label and model output files.
+    label_files, output_files = find_challenge_files(label_folder, output_folder)
+    murmur_labels = load_murmurs(label_files, murmur_classes)
+    murmur_binary_outputs, murmur_scalar_outputs = load_classifier_outputs(output_files, murmur_classes)
+    outcome_labels = load_outcomes(label_files, outcome_classes)
+    outcome_binary_outputs, outcome_scalar_outputs = load_classifier_outputs(output_files, outcome_classes)
+    
+    max_wc = 0
+    max_th = 0
+    min_cost = 100000
+    min_th = 1000
+    for th1 in [0.01, 0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8] :
+        murmur_binary_outputs[:,0] = murmur_scalar_outputs[:,0] > th1
+        murmur_binary_outputs[:,2] = murmur_scalar_outputs[:,2] > 1 - th1
+        outcome_binary_outputs[:,0] = outcome_scalar_outputs[:,0] > th1
+        outcome_binary_outputs[:,1] = outcome_scalar_outputs[:,1] > 1 - th1
+        # For each patient, set the 'Present' or 'Abnormal' class to positive if no class is positive or if multiple classes are positive.
+        murmur_labels = enforce_positives(murmur_labels, murmur_classes, 'Present')
+        murmur_binary_outputs = enforce_positives(murmur_binary_outputs, murmur_classes, 'Present')
+        outcome_labels = enforce_positives(outcome_labels, outcome_classes, 'Abnormal')
+        outcome_binary_outputs = enforce_positives(outcome_binary_outputs, outcome_classes, 'Abnormal')
+        # Evaluate the murmur model by comparing the labels and model outputs.
+        murmur_auroc, murmur_auprc, murmur_auroc_classes, murmur_auprc_classes = compute_auc(murmur_labels, murmur_scalar_outputs)
+        murmur_f_measure, murmur_f_measure_classes = compute_f_measure(murmur_labels, murmur_binary_outputs)
+        murmur_accuracy, murmur_accuracy_classes = compute_accuracy(murmur_labels, murmur_binary_outputs)
+        murmur_weighted_accuracy = compute_weighted_accuracy(murmur_labels, murmur_binary_outputs, murmur_classes) # This is the murmur scoring metric.
+
+        if murmur_weighted_accuracy > max_wc :
+            max_wc = murmur_weighted_accuracy
+            max_th = th1
+
+        outcome_auroc, outcome_auprc, outcome_auroc_classes, outcome_auprc_classes = compute_auc(outcome_labels, outcome_scalar_outputs)
+        outcome_f_measure, outcome_f_measure_classes = compute_f_measure(outcome_labels, outcome_binary_outputs)
+        outcome_accuracy, outcome_accuracy_classes = compute_accuracy(outcome_labels, outcome_binary_outputs)
+        outcome_weighted_accuracy = compute_weighted_accuracy(outcome_labels, outcome_binary_outputs, outcome_classes)
+        outcome_cost = compute_cost(outcome_labels, outcome_binary_outputs, outcome_classes, outcome_classes) # This is the clinical outcomes scoring metric.
+
+        if outcome_cost < min_cost :
+            min_cost = outcome_cost
+            min_th = th1
+
+    params_feature['max_wc'] = max_wc
+    params_feature['min_cost'] = min_cost
+    params_feature['max_th'] = max_th
+    params_feature['min_th'] = min_th
+
+    tnow = datetime.datetime.now()
+    fnm = 'res2/rec'+ str(tnow)+'.pk'
+    
+    with open(fnm, 'wb') as f:
+        pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
+
+
+
+
+
+
+
+
+
+####### n_mels 150
+
+
+for i in range(3) :
+    model_folder = 'lcnn_hp_'+ str(i)
+    output_folder = '/home/ubuntu/hmd/notebooks/tmp/out_lcnn_hp_'+ str(i)
+
+    params_feature = {'samp_sec': 20,
+                  #### melspec, stft 피쳐 옵션들  
+                  'pre_emphasis': 0,
+                  'hop_length': 256,
+                  'win_length':512,
+                  'n_mels': 150,
+                  #### cqt 피쳐 옵션들  
+                  'filter_scale': 1,
+                  'n_bins': 80,
+                      'fmin': 10,
+                    ### 사용할 피쳐 지정
+                      'trim' : 4000, # 앞뒤 얼마나 자를지? 4000 이면 1초
+                      'use_mel' : True,
+                      'use_cqt' : False,
+                      'use_stft' : False
+    }
+    mm_weight = 3
+    oo_weight = 3
+    ord1 = True
+
+    use_mel = params_feature['use_mel']
+    use_cqt = params_feature['use_cqt']
+    use_stft = params_feature['use_stft']
+    
+    
+    if ord1 :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    else :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all(test_folder, patient_files_test, **params_feature)
+
+    params_feature['ord1'] = ord1
+        
+
+    model1 = get_LCNN_o_1(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+    model2 = get_LCNN_2(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+              #          'highpass': [.5, [78,79,80,81,82,83,84,85]]
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+              #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             mm_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: mm_weight, 1: 1.} 
+    
+    model1.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             mm_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(mm_lbs_trn)/64),
+                           class_weight=class_weight, 
+                             epochs = n_epoch)
+
+    n_epoch = 100
+    lr = LearningRateScheduler(lambda e: sigmoidal_decay(e, end=n_epoch))
+    batch_size = 64
+    params = {'batch_size': batch_size,
+              #          'input_shape': (100, 313, 1),
+              'shuffle': True,
+              'beta_param': 0.7,
+              'mixup': True,
+              #          'lowpass': [.5, [11,12,13,14,15,16,17,18]]
+            'highpass': [.5, [78,79,80,81,82,83,84,85]],
+              'ranfilter2' : [3, [18,19,20,21,22,23]]
+            #           'dropblock' : [30, 100]
+              #'device' : device
+    }
+
+    params_no_shuffle = {'batch_size': batch_size,
+                         #          'input_shape': (100, 313, 1),
+                         'shuffle': False,
+                         'beta_param': 0.7,
+                         'mixup': False
+                         #'device': device
+    }
+
+    TrainDGen_1 = Generator0([features_trn['age'],features_trn['sex'], features_trn['hw'], features_trn['preg'], features_trn['loc'], 
+                              features_trn['mel1'],features_trn['cqt1'],features_trn['stft1']], 
+                             out_lbs_trn,  ## our Y
+                             **params)()
+
+    class_weight = {0: oo_weight, 1: 1.} 
+    
+    model2.fit(TrainDGen_1,
+          validation_data = ([features_test['age'],features_test['sex'], features_test['hw'], 
+                              features_test['preg'], features_test['loc'], features_test['mel1'], 
+                              features_test['cqt1'], features_test['stft1']], 
+                             out_lbs_test), 
+                             callbacks=[lr],
+                              steps_per_epoch=np.ceil(len(out_lbs_trn)/64),
+                             epochs = n_epoch)
+
+
+    params_feature['mel_shape'] = mel_input_shape
+    params_feature['cqt_shape'] = cqt_input_shape
+    params_feature['stft_shape'] = stft_input_shape
+
+    params_feature['use_mel'] = use_mel
+    params_feature['use_cqt'] = use_cqt
+    params_feature['use_stft'] = use_stft
+    
+    save_challenge_model(model_folder, model1, model2, m_name1 = 'lcnn1', m_name2 = 'lcnn2', param_feature = params_feature)
+    
+    run_model(model_folder, test_folder, output_folder, allow_failures = True, verbose = 1)
+
+    murmur_scores, outcome_scores = evaluate_model(test_folder, output_folder)
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = murmur_scores
+    murmur_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    murmur_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    params_feature['mm_weighted_accuracy'] = weighted_accuracy
+    
+    classes, auroc, auprc, auroc_classes, auprc_classes, f_measure, f_measure_classes, accuracy, accuracy_classes, weighted_accuracy, cost = outcome_scores
+    outcome_output_string = 'AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n'.format(auroc, auprc, f_measure, accuracy, weighted_accuracy, cost)
+    outcome_class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}\nAccuracy,{}\n'.format(
+    ','.join(classes),
+    ','.join('{:.3f}'.format(x) for x in auroc_classes),
+    ','.join('{:.3f}'.format(x) for x in auprc_classes),
+    ','.join('{:.3f}'.format(x) for x in f_measure_classes),
+    ','.join('{:.3f}'.format(x) for x in accuracy_classes))
+
+    output_string = '#Murmur scores\n' + murmur_output_string + '\n#Outcome scores\n' + outcome_output_string \
+    + '\n#Murmur scores (per class)\n' + murmur_class_output_string + '\n#Outcome scores (per class)\n' + outcome_class_output_string
+    
+    params_feature['out_cost'] = cost
+
+    label_folder = test_folder
+    murmur_classes = ['Present', 'Unknown', 'Absent']
+    outcome_classes = ['Abnormal', 'Normal']
+
+    # Load and parse label and model output files.
+    label_files, output_files = find_challenge_files(label_folder, output_folder)
+    murmur_labels = load_murmurs(label_files, murmur_classes)
+    murmur_binary_outputs, murmur_scalar_outputs = load_classifier_outputs(output_files, murmur_classes)
+    outcome_labels = load_outcomes(label_files, outcome_classes)
+    outcome_binary_outputs, outcome_scalar_outputs = load_classifier_outputs(output_files, outcome_classes)
+    
+    max_wc = 0
+    max_th = 0
+    min_cost = 100000
+    min_th = 1000
+    for th1 in [0.01, 0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8] :
+        murmur_binary_outputs[:,0] = murmur_scalar_outputs[:,0] > th1
+        murmur_binary_outputs[:,2] = murmur_scalar_outputs[:,2] > 1 - th1
+        outcome_binary_outputs[:,0] = outcome_scalar_outputs[:,0] > th1
+        outcome_binary_outputs[:,1] = outcome_scalar_outputs[:,1] > 1 - th1
+        # For each patient, set the 'Present' or 'Abnormal' class to positive if no class is positive or if multiple classes are positive.
+        murmur_labels = enforce_positives(murmur_labels, murmur_classes, 'Present')
+        murmur_binary_outputs = enforce_positives(murmur_binary_outputs, murmur_classes, 'Present')
+        outcome_labels = enforce_positives(outcome_labels, outcome_classes, 'Abnormal')
+        outcome_binary_outputs = enforce_positives(outcome_binary_outputs, outcome_classes, 'Abnormal')
+        # Evaluate the murmur model by comparing the labels and model outputs.
+        murmur_auroc, murmur_auprc, murmur_auroc_classes, murmur_auprc_classes = compute_auc(murmur_labels, murmur_scalar_outputs)
+        murmur_f_measure, murmur_f_measure_classes = compute_f_measure(murmur_labels, murmur_binary_outputs)
+        murmur_accuracy, murmur_accuracy_classes = compute_accuracy(murmur_labels, murmur_binary_outputs)
+        murmur_weighted_accuracy = compute_weighted_accuracy(murmur_labels, murmur_binary_outputs, murmur_classes) # This is the murmur scoring metric.
+
+        if murmur_weighted_accuracy > max_wc :
+            max_wc = murmur_weighted_accuracy
+            max_th = th1
+
+        outcome_auroc, outcome_auprc, outcome_auroc_classes, outcome_auprc_classes = compute_auc(outcome_labels, outcome_scalar_outputs)
+        outcome_f_measure, outcome_f_measure_classes = compute_f_measure(outcome_labels, outcome_binary_outputs)
+        outcome_accuracy, outcome_accuracy_classes = compute_accuracy(outcome_labels, outcome_binary_outputs)
+        outcome_weighted_accuracy = compute_weighted_accuracy(outcome_labels, outcome_binary_outputs, outcome_classes)
+        outcome_cost = compute_cost(outcome_labels, outcome_binary_outputs, outcome_classes, outcome_classes) # This is the clinical outcomes scoring metric.
+
+        if outcome_cost < min_cost :
+            min_cost = outcome_cost
+            min_th = th1
+
+    params_feature['max_wc'] = max_wc
+    params_feature['min_cost'] = min_cost
+    params_feature['max_th'] = max_th
+    params_feature['min_th'] = min_th
+
+    tnow = datetime.datetime.now()
+    fnm = 'res2/rec'+ str(tnow)+'.pk'
+    
+    with open(fnm, 'wb') as f:
+        pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
+
+
+
+
+
 
 
 
