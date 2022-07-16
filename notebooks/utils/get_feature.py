@@ -5,13 +5,13 @@ from helper_code import *
 import math
 import os, numpy as np, scipy as sp, scipy.io, scipy.io.wavfile
 
-def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100):
+def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100, trim = 4000):
 
     if isinstance(fnm, str) :
         data, sample_rate = librosa.load(fnm, sr = sr)
-        data = data * 1.0
+        data = data[trim:-trim] * 1.0
     else :
-        data = fnm * 1.0
+        data = fnm[trim:-trim] * 1.0
         sample_rate = sr
 
     if samp_sec:
@@ -49,13 +49,13 @@ def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_l
 
 
 
-def feature_extract_stft(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512):
+def feature_extract_stft(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, trim = 4000):
 
     if isinstance(fnm, str) :
         data, sample_rate = librosa.load(fnm, sr = sr)
-        data = data * 1.0
+        data = data[trim:-trim] * 1.0
     else :
-        data = fnm * 1.0
+        data = fnm[trim:-trim] * 1.0
         sample_rate = sr
 
     if samp_sec:
@@ -91,13 +91,13 @@ def feature_extract_stft(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_leng
     return Sig
 
 
-def feature_extract_cqt(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, filter_scale = 1, n_bins = 80, fmin = 10):
+def feature_extract_cqt(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000):
 
     if isinstance(fnm, str) :
         data, sample_rate = sf.read(fnm, dtype = 'int16')
-        data = data * 1.0
+        data = data[trim:-trim] * 1.0
     else :
-        data = fnm * 1.0
+        data = fnm[trim:-trim] * 1.0
         sample_rate = sr
 
 
@@ -758,7 +758,7 @@ def get_features_3lb_all_ord_tmp(data_folder, patient_files_trn, po = .5,
 
 def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .5,
                           samp_sec=20, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100,
-                             filter_scale = 1, n_bins = 80, fmin = 10,
+                             filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,
                              use_mel = True, use_cqt = False, use_stft = False, use_raw = False
                          ) :
     features = dict()
@@ -799,23 +799,23 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .5,
             # Extract melspec
             if use_mel :
                 mel1 = feature_extract_melspec(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
-                                               win_length = win_length, n_mels = n_mels)[0]
+                                               win_length = win_length, n_mels = n_mels, trim = trim)[0]
             else :
-                mel1 = np.zeros( (1,1) )
+                mel1 = np.zeros( (1,1,1) )
             features['mel1'].append(mel1)
 
             if use_cqt :
                 mel2 = feature_extract_cqt(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, filter_scale = filter_scale, 
-                                           n_bins = n_bins, fmin = fmin)[0]
+                                           n_bins = n_bins, fmin = fmin, trim = trim)[0]
             else :
-                mel2 = np.zeros( (1,1) )
+                mel2 = np.zeros( (1,1,1) )
             features['cqt1'].append(mel2)
 
             if use_stft :
                 mel3 = feature_extract_stft(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
-                                       win_length = win_length)[0]
+                                            win_length = win_length, trim = trim)[0]
             else :
-                mel3 = np.zeros( (1,1) )
+                mel3 = np.zeros( (1,1,1) )
             features['stft1'].append(mel3)
 
             if use_raw :
@@ -899,25 +899,32 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .5,
             mm_labels.append(current_mm_labels)
             out_labels.append(current_out_labels)
 
-    M, N = features['mel1'][i].shape
     if use_mel : 
+        M, N = features['mel1'][i].shape
         for i in range(len(features['mel1'])) :
             features['mel1'][i] = features['mel1'][i].reshape(M,N,1)
         print("melspec: ", M,N)
+    else :
+        M, N, _ = features['mel1'][i].shape
     mel_input_shape = (M,N,1)
         
-    M, N = features['cqt1'][i].shape
     if use_cqt :
+        M, N = features['cqt1'][i].shape
         for i in range(len(features['cqt1'])) :
             features['cqt1'][i] = features['cqt1'][i].reshape(M,N,1)
         print("cqt: ", M,N)
+    else :
+        M, N, _ = features['cqt1'][i].shape
     cqt_input_shape = (M,N,1)
 
-    M, N = features['stft1'][i].shape
+    
     if use_stft :
+        M, N = features['stft1'][i].shape
         for i in range(len(features['stft1'])) :
             features['stft1'][i] = features['stft1'][i].reshape(M,N,1)
         print("stft: ", M,N)
+    else :
+        M, N, _ = features['stft1'][i].shape
     stft_input_shape = (M,N,1)
         
     for k1 in features.keys() :
@@ -930,7 +937,7 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .5,
 
 def get_features_3lb_all(data_folder, patient_files_trn, 
                           samp_sec=20, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100,
-                          filter_scale = 1, n_bins = 80, fmin = 10,
+                          filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,
                          use_mel = True, use_cqt = False, use_stft= False, use_raw = False
                          ) :
     features = dict()
@@ -971,23 +978,23 @@ def get_features_3lb_all(data_folder, patient_files_trn,
             # Extract melspec
             if use_mel :
                 mel1 = feature_extract_melspec(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
-                                           win_length = win_length, n_mels = n_mels)[0]
+                                               win_length = win_length, n_mels = n_mels, trim = trim)[0]
             else :
-                mel1 = np.zeros( (1,1) )
+                mel1 = np.zeros( (1,1,1) )
             features['mel1'].append(mel1)
 
             if use_cqt :
                 mel2 = feature_extract_cqt(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, filter_scale = filter_scale, 
-                                        n_bins = n_bins, fmin = fmin)[0]
+                                           n_bins = n_bins, fmin = fmin, trim = trim)[0]
             else :
-                mel2 = np.zeros( (1,1) )                
+                mel2 = np.zeros( (1,1,1) )                
             features['cqt1'].append(mel2)
 
             if use_stft :
                 mel3 = feature_extract_stft(filename, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
-                                       win_length = win_length)[0]
+                                            win_length = win_length, trim = trim)[0]
             else :
-                mel3 = np.zeros( (1,1) )
+                mel3 = np.zeros( (1,1,1) )
             features['stft1'].append(mel3)
 
             if use_raw :
@@ -1073,27 +1080,34 @@ def get_features_3lb_all(data_folder, patient_files_trn,
             mm_labels.append(current_mm_labels)
             out_labels.append(current_out_labels)
 
-    M, N = features['mel1'][i].shape
-    if use_mel :
+    if use_mel : 
+        M, N = features['mel1'][i].shape
         for i in range(len(features['mel1'])) :
             features['mel1'][i] = features['mel1'][i].reshape(M,N,1)
         print("melspec: ", M,N)
+    else :
+        M, N, _ = features['mel1'][i].shape
     mel_input_shape = (M,N,1)
         
-    M, N = features['cqt1'][i].shape
     if use_cqt :
+        M, N = features['cqt1'][i].shape
         for i in range(len(features['cqt1'])) :
             features['cqt1'][i] = features['cqt1'][i].reshape(M,N,1)
         print("cqt: ", M,N)
+    else :
+        M, N, _ = features['cqt1'][i].shape
     cqt_input_shape = (M,N,1)
 
-    M, N = features['stft1'][i].shape
+    
     if use_stft :
+        M, N = features['stft1'][i].shape
         for i in range(len(features['stft1'])) :
             features['stft1'][i] = features['stft1'][i].reshape(M,N,1)
         print("stft: ", M,N)
+    else :
+        M, N, _ = features['stft1'][i].shape
     stft_input_shape = (M,N,1)
-        
+    
     for k1 in features.keys() :
         features[k1] = np.array(features[k1])
     

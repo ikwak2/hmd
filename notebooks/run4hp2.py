@@ -133,7 +133,7 @@ def run_challenge_model(model, data, recordings, verbose):
     if model['model2'] == 'toy2' :
         model2 = get_toy5_2(model['mel_shape'],model['cqt_shape'],model['stft_shape'])
     if model['model1'] == 'lcnn1' :
-        model1 = get_LCNN_o_1(model['mel_shape'],model['cqt_shape'],model['stft_shape'], use_mel = model['use_mel'], use_cqt = model['use_cqt'], use_stft = model['use_stft'], ord1 = True)
+        model1 = get_LCNN_o_1(model['mel_shape'],model['cqt_shape'],model['stft_shape'], use_mel = model['use_mel'], use_cqt = model['use_cqt'], use_stft = model['use_stft'], ord1 = model['ord1'])
     if model['model2'] == 'lcnn2' :
         model2 = get_LCNN_2(model['mel_shape'],model['cqt_shape'],model['stft_shape'], use_mel = model['use_mel'], use_cqt = model['use_cqt'], use_stft = model['use_stft'])
     model1.load_weights(model['model_fnm1'])
@@ -155,18 +155,19 @@ def run_challenge_model(model, data, recordings, verbose):
     use_cqt = model['use_cqt']
     use_stft = model['use_stft']
     use_raw = model['use_raw']
+    trim = model['trim']
     
     features['mel1'] = []
     for i in range(len(recordings)) :
         if use_mel :
             mel1 = feature_extract_melspec(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
-                                           win_length = win_length, n_mels = n_mels)[0]
+                                           win_length = win_length, n_mels = n_mels, trim = trim)[0]
         else :
             mel1 = np.zeros( (1,1) )
         features['mel1'].append(mel1)
     M, N = features['mel1'][0].shape
 
-    if use mel :
+    if use_mel :
         for i in range(len(features['mel1'])) :
             features['mel1'][i] = features['mel1'][i].reshape(M,N,1)
     features['mel1'] = np.array(features['mel1'])
@@ -175,7 +176,7 @@ def run_challenge_model(model, data, recordings, verbose):
     for i in range(len(recordings)) :
         if use_cqt :
             mel1 = feature_extract_cqt(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, filter_scale = filter_scale, 
-                                        n_bins = n_bins, fmin = fmin)[0]
+                                        n_bins = n_bins, fmin = fmin, trim = trim)[0]
         else :
             mel1 = np.zeros( (1,1))
         features['cqt1'].append(mel1)
@@ -189,7 +190,7 @@ def run_challenge_model(model, data, recordings, verbose):
     for i in range(len(recordings)) :
         if use_stft :
             mel1 = feature_extract_stft(recordings[i]/ 32768, samp_sec=samp_sec, pre_emphasis = pre_emphasis, hop_length=hop_length, 
-                                       win_length = win_length)[0]
+                                        win_length = win_length, trim = trim)[0]
         else :
             mel1 = np.zeros( (1,1) )
         features['stft1'].append(mel1)
@@ -251,16 +252,29 @@ for i in range(3) :
                   'n_bins': 80,
                       'fmin': 10,
                     ### 사용할 피쳐 지정
+                      'trim' : 4000, # 앞뒤 얼마나 자를지? 4000 이면 1초
                       'use_mel' : True,
                       'use_cqt' : False,
                       'use_stft' : False
     }
     mm_weight = 3
     oo_weight = 3
-    
+    ord1 = True
 
-    features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
-    features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    use_mel = params_feature['use_mel']
+    use_cqt = params_feature['use_cqt']
+    use_stft = params_feature['use_stft']
+    
+    
+    if ord1 :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all_ord(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all_ord(test_folder, patient_files_test, **params_feature)
+    else :
+        features_trn, mm_lbs_trn, out_lbs_trn, mel_input_shape, cqt_input_shape, stft_input_shape = get_features_3lb_all(train_folder, patient_files_trn, **params_feature)
+        features_test, mm_lbs_test, out_lbs_test, _, _, _ = get_features_3lb_all(test_folder, patient_files_test, **params_feature)
+
+    params_feature['ord1'] = ord1
+        
 
     model1 = get_LCNN_o_1(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
     model2 = get_LCNN_2(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = use_mel, use_cqt = use_cqt, use_stft = use_stft)
@@ -433,7 +447,8 @@ for i in range(3) :
     params_feature['max_th'] = max_th
     params_feature['min_th'] = min_th
 
-    fnm = 'res/param_lcnn_hp_'+ str(i)+'.pk'
+    tnow = datetime.datetime.now()
+    fnm = 'res2/rec'+ str(tnow)+'.pk'
     
     with open(fnm, 'wb') as f:
         pickle.dump(params_feature, f, pickle.HIGHEST_PROTOCOL)
