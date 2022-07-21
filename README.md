@@ -14,3 +14,20 @@ Participating [heart murmur detection challenge](https://moody-challenge.physion
 - murmur probability 2개로 나눠서 중간부분 unknown 으로 모형화 (ordinal regression도 공부해보고 이거저거 해봐야할듯?)
 - Threshold 조절해서 스코어 최적화 (Done, Controlling thresholds.ipynb)
 - pytorch 진행하는 학생들: 1. AAIST (raw audio 피쳐로 graph neural net 쓰는 모형) 시도해 봐도 좋을듯 2. AAIST 임베딩과 다른 모형 임베딩 합쳐서 2단 트레이닝으로 구성해서 앙상블모형 작성해봐도 좋을듯 (이건 tensorflow로 푸는 쪽도 고려해볼만함)
+
+## Summisions
+
+- LNNN using melspectrogram with mixup, FFM RP augmentation
+```
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.772,0.627,0.526,0.806,**0.771**,16532.976
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.690,0.696,0.454,0.555,0.827,**12885.663**
+
+# Leader board scores
+Murmur, outcome
+0.723, 10022
+'''
+
