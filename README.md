@@ -21,10 +21,10 @@ Participating [heart murmur detection challenge](https://moody-challenge.physion
 ```
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
-0.772,0.627,0.526,0.806,**0.771**,16532.976
+0.772,0.627,0.526,0.806,*0.771*,16532.976
 #Outcome scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
-0.690,0.696,0.454,0.555,0.827,**12885.663**
+0.690,0.696,0.454,0.555,0.827,*12885.663*
 
 # Leader board scores
 Murmur, outcome
