@@ -7,14 +7,15 @@
 * **model3_LCNN_rr_qrs.ipynb** - LCNN 모형에 rr interval(jk)과 qrs interval(sy) 변수 추가  
 
 ***
-> QRS interval  
-> wide한지 narrow한지 ECG 간격을 통해 부정맥 원인 부위를 짐작할 수 있다.
+> **QRS interval**    
+: wide한지 narrow한지 ECG 간격을 통해 부정맥 원인 부위를 짐작할 수 있다.  
+
 ![qrs](https://user-images.githubusercontent.com/54921677/180925312-3e1fa6ea-b30a-41e5-8f6a-c27fc3ff30d2.png)
 
-[QRS interval][https://litfl.com/qrs-interval-ecg-library/]
+[QRS interval](https://litfl.com/qrs-interval-ecg-library/)
 
-1. Narrow
-![narrow](https://user-images.githubusercontent.com/54921677/180925865-62e10cc7-374e-4703-a565-909695710ca5.PNG)
+1. Narrow   
+![narrow](https://user-images.githubusercontent.com/54921677/180925865-62e10cc7-374e-4703-a565-909695710ca5.PNG)   
 
-2. Broad
-![Broad](https://user-images.githubusercontent.com/54921677/180925869-b14626c3-67d6-4a52-9654-e79ae96b66bd.PNG)
+2. Broad   
+![Broad](https://user-images.githubusercontent.com/54921677/180925869-b14626c3-67d6-4a52-9654-e79ae96b66bd.PNG)   
