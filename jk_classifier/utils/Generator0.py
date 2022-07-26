@@ -503,5 +503,3 @@ def evalEER_f2(gen, fnms) :
     print('EER: {}'.format(eer))
 
     return eer
-
-
