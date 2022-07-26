@@ -253,7 +253,7 @@ def get_features_3lb(data_folder, patient_files_trn) :
             current_out_labels = np.zeros(2)
             if mm_label == 'Absent' :
                 current_mm_labels = np.array([0, 0, 1])
-            elif mm_label == 'unknown' :
+            elif mm_label == 'Unknown' :
                 current_mm_labels = np.array([0, 1, 0])
             else :
                 mm_loc = get_murmur_loc(current_patient_data)
@@ -571,7 +571,7 @@ def get_features_3lb_all_tmp(data_folder, patient_files_trn,
             current_out_labels = np.zeros(2)
             if mm_label == 'Absent' :
                 current_mm_labels = np.array([0, 0, 1])
-            elif mm_label == 'unknown' :
+            elif mm_label == 'Unknown' :
                 current_mm_labels = np.array([0, 1, 0])
             else :
                 mm_loc = get_murmur_loc(current_patient_data)
@@ -724,7 +724,7 @@ def get_features_3lb_all_ord_tmp(data_folder, patient_files_trn, po = .3,
             out_label = get_outcome(current_patient_data)
             if mm_label == 'Absent' :
                 current_mm_labels = np.array([0, 1])
-            elif mm_label == 'unknown' :
+            elif mm_label == 'Unknown' :
                 current_mm_labels = np.array([po, 1-po])
             else :
                 mm_loc = get_murmur_loc(current_patient_data)
@@ -893,7 +893,7 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
             out_label = get_outcome(current_patient_data)
             if mm_label == 'Absent' :
                 current_mm_labels = np.array([0, 1])
-            elif mm_label == 'unknown' :
+            elif mm_label == 'Unknown' :
                 current_mm_labels = np.array([po, 1-po])
             else :
                 mm_loc = get_murmur_loc(current_patient_data)
@@ -1074,7 +1074,7 @@ def get_features_3lb_all(data_folder, patient_files_trn,
             current_out_labels = np.zeros(2)
             if mm_label == 'Absent' :
                 current_mm_labels = np.array([0, 0, 1])
-            elif mm_label == 'unknown' :
+            elif mm_label == 'Unknown' :
                 current_mm_labels = np.array([0, 1, 0])
             else :
                 mm_loc = get_murmur_loc(current_patient_data)
@@ -1277,7 +1277,7 @@ def get_features_3lb_all_jk(data_folder, patient_files_trn,
             current_out_labels = np.zeros(2)
             if mm_label == 'Absent' :
                 current_mm_labels = np.array([0, 0, 1])
-            elif mm_label == 'unknown' :
+            elif mm_label == 'Unknown' :
                 current_mm_labels = np.array([0, 1, 0])
             else :
                 mm_loc = get_murmur_loc(current_patient_data)
