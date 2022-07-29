@@ -7,6 +7,18 @@ from tensorflow.keras.layers import Convolution2D, GlobalAveragePooling2D, MaxPo
 from tensorflow.keras.layers import add,concatenate
 from tensorflow.keras.activations import relu, softmax, swish
 import tensorflow
+import numpy as np
+
+def sigmoidal_decay(e, start=0, end=100, lr_start=1e-3, lr_end=1e-5):
+    if e < start:
+        return lr_start
+    elif e > end:
+        return lr_end
+
+    middle = (start + end) / 2
+    s = lambda x: 1 / (1 + np.exp(-x))
+
+    return s(13 * (-e + middle) / np.abs(end - start)) * np.abs(lr_start - lr_end) + lr_end
 
 def get_toy(mel_input_shape):
         # Create a towy model.
@@ -1705,7 +1717,8 @@ def get_LCNN_o_1_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel 
 
         max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
         mel2 = layers.GlobalAveragePooling2D()(max28)
-        mel2 = Dropout(dp)(mel2)
+        if dp :
+            mel2 = Dropout(dp)(mel2)
 
     if use_cqt :
         ## cqt embedding
@@ -1758,7 +1771,8 @@ def get_LCNN_o_1_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel 
         
         max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
         cqt2 = layers.GlobalAveragePooling2D()(max28)
-        cqt2 = Dropout(dp)(cqt2)
+        if dp :
+            cqt2 = Dropout(dp)(cqt2)
 
     if use_stft :
         ## stft embedding
@@ -1811,7 +1825,8 @@ def get_LCNN_o_1_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel 
         
         max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
         stft2 = layers.GlobalAveragePooling2D()(max28)
-        stft2 = Dropout(dp)(stft2)
+        if dp :
+            stft2 = Dropout(dp)(stft2)
     
     
     if use_mel and use_cqt and use_stft :
@@ -1836,7 +1851,8 @@ def get_LCNN_o_1_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel 
         
     if fc :
         concat2 = layers.Dense(10, activation = "relu")(concat2)
-        concat2 = Dropout(dp)(concat2)
+        if dp :
+            concat2 = Dropout(dp)(concat2)
         
     if ord1 :
         res1 = layers.Dense(2, activation = "softmax")(concat2)
@@ -1851,7 +1867,7 @@ def get_LCNN_o_1_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel 
     model.compile(loss=['categorical_crossentropy'], optimizer='adam', metrics=['accuracy','AUC'])
     return(model)
 
-def get_LCNN_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = True, use_cqt = True, use_stft = True, dp = .5, fc = False, ext = False):
+def get_LCNN_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = True, use_cqt = True, use_stft = True, dp = False, fc = False, ext = False):
         # Create a towy model.
     age = keras.Input(shape=(6,), name = 'age_cat')
     sex = keras.Input(shape=(2,), name = 'sex_cat')
@@ -1926,7 +1942,8 @@ def get_LCNN_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = 
 
         max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
         mel2 = layers.GlobalAveragePooling2D()(max28)
-        mel2 = Dropout(dp)(mel2)
+        if dp :
+            mel2 = Dropout(dp)(mel2)
 
     if use_cqt :
         ## cqt embedding
@@ -1979,7 +1996,8 @@ def get_LCNN_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = 
 
         max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
         cqt2 = layers.GlobalAveragePooling2D()(max28)
-        cqt2 = Dropout(dp)(cqt2)
+        if dp :
+            cqt2 = Dropout(dp)(cqt2)
 
     if use_stft :
         ## stft embedding
@@ -2032,7 +2050,8 @@ def get_LCNN_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = 
 
         max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
         stft2 = layers.GlobalAveragePooling2D()(max28)
-        stft2 = Dropout(dp)(stft2)
+        if dp :
+            stft2 = Dropout(dp)(stft2)
     
 #    concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, preg])
 #    d1 = layers.Dense(2, activation = 'relu')(concat1)
@@ -2059,7 +2078,8 @@ def get_LCNN_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = 
         
     if fc :
         concat2 = layers.Dense(10, activation = 'relu')(concat2)
-        concat2 = Dropout(dp)(concat2)
+        if dp :
+            concat2 = Dropout(dp)(concat2)
 
     res1 = layers.Dense(3, activation = "softmax")(concat2)
     res2 = layers.Dense(2, activation = "softmax")(concat2)
@@ -2073,3 +2093,330 @@ def get_LCNN_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = 
 
 
 
+
+def get_ResMax_o_1_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = True, use_cqt = True, use_stft = True, ord1 = True, dp = False, fc = False, ext = False):
+        # Create a towy model.
+    age = keras.Input(shape=(6,), name = 'age_cat')
+    sex = keras.Input(shape=(2,), name = 'sex_cat')
+    hw = keras.Input(shape=(2,), name = 'height_weight')
+    preg = keras.Input(shape=(1,), name = 'is_preg')
+    loc = keras.Input(shape=(5,), name = 'loc')
+    mel1 = keras.Input(shape=(mel_input_shape), name = 'mel')
+    cqt1 = keras.Input(shape=(cqt_input_shape), name = 'cqt')
+    stft1 = keras.Input(shape=(stft_input_shape), name = 'stft')
+        
+        
+    ## age embeddig
+    age1 = layers.Dense(2, activation = None)(age)
+
+    ## sex embedding
+    sex1 = layers.Dense(1, activation = None)(sex)
+
+    ## hw embedding
+    hw1 = layers.Dense(1, activation = None)(hw)
+
+    ## loc embedding
+    loc1 = layers.Dense(3, activation = None)(loc)
+
+    ## mel embedding
+    if use_mel :
+        x = ResMax(16,3,1, upscale = True)(mel1)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(16,3,1, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(24,3,1, upscale = True)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(32,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(32,3,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(48,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(48,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        mel2 = GlobalAveragePooling2D()(x)
+        if dp :
+            mel2 = Dropout(dp)(mel2)
+
+    if use_cqt :
+        ## cqt embedding
+        x = ResMax(16,3,1, upscale = True)(cqt1)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(16,3,1, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(24,3,1, upscale = True)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(32,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(32,3,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(48,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(48,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        cqt2 = layers.GlobalAveragePooling2D()(x)
+        if dp :
+            cqt2 = Dropout(dp)(cqt2)
+
+    if use_stft :
+        ## stft embedding
+        x = ResMax(16,3,1, upscale = True)(stft1)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(16,3,1, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(24,3,1, upscale = True)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(32,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(32,3,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(48,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(48,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        stft2 = layers.GlobalAveragePooling2D()(x)
+        if dp :
+            stft2 = Dropout(dp)(stft2)
+    
+    if use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2, stft2])
+    if not use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([cqt2, stft2])
+    if use_mel and not use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, stft2])
+    if use_mel and use_cqt and not use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2])
+    if not use_mel and not use_cqt and use_stft :  ## stft 만
+        concat2 = stft2
+    if use_mel and not use_cqt and not use_stft :  ### mel만
+        concat2 = mel2
+    if not use_mel and use_cqt and not use_stft :  ### cqt만
+        concat2 = cqt2
+
+    if ext :
+        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, preg])
+        d1 = layers.Dense(2, activation = 'relu')(concat1)
+        concat2 = layers.Concatenate()([concat2, d1])
+        
+    if fc :
+        concat2 = layers.Dense(10, activation = "relu")(concat2)
+        if dp :
+            concat2 = Dropout(dp)(concat2)
+        
+    if ord1 :
+        res1 = layers.Dense(2, activation = "softmax")(concat2)
+    else :
+        res1 = layers.Dense(3, activation = "softmax")(concat2)
+
+        
+    res2 = layers.Dense(2, activation = "softmax")(concat2)
+
+    model = keras.Model(inputs = [age,sex,hw,preg,loc,mel1,cqt1,stft1] , outputs = res1 )
+    
+    model.compile(loss=['categorical_crossentropy'], optimizer='adam', metrics=['accuracy','AUC'])
+    return(model)
+
+
+def get_ResMax_2_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel = True, use_cqt = True, use_stft = True, dp = False, fc = False, ext = False):
+        # Create a towy model.
+    age = keras.Input(shape=(6,), name = 'age_cat')
+    sex = keras.Input(shape=(2,), name = 'sex_cat')
+    hw = keras.Input(shape=(2,), name = 'height_weight')
+    preg = keras.Input(shape=(1,), name = 'is_preg')
+    loc = keras.Input(shape=(5,), name = 'loc')
+    mel1 = keras.Input(shape=(mel_input_shape), name = 'mel')
+    cqt1 = keras.Input(shape=(cqt_input_shape), name = 'cqt')
+    stft1 = keras.Input(shape=(stft_input_shape), name = 'stft')
+        
+        
+    ## age embeddig
+    age1 = layers.Dense(2, activation = None)(age)
+
+    ## sex embedding
+    sex1 = layers.Dense(1, activation = None)(sex)
+
+    ## hw embedding
+    hw1 = layers.Dense(1, activation = None)(hw)
+
+    ## loc embedding
+    loc1 = layers.Dense(3, activation = None)(loc)
+
+    if use_mel :
+        ## mel embedding
+        x = ResMax(16,3,1, upscale = True)(mel1)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(16,3,1, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(24,3,1, upscale = True)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(32,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(32,3,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(48,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(48,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        mel2 = GlobalAveragePooling2D()(x)
+        if dp :
+            mel2 = Dropout(dp)(mel2)
+
+    if use_cqt :
+        ## cqt embedding
+        x = ResMax(16,3,1, upscale = True)(cqt1)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(16,3,1, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(24,3,1, upscale = True)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(32,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(32,3,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(48,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(48,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        cqt2 = GlobalAveragePooling2D()(x)
+        if dp :
+            cqt2 = Dropout(dp)(cqt2)
+
+    if use_stft :
+        ## stft embedding
+        x = ResMax(16,3,1, upscale = True)(stft1)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(16,3,1, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        x = ResMax(24,3,1, upscale = True)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(32,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(32,3,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(48,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        x = ResMax(48,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,3,0, upscale = True)(x)
+        x = BatchNormalization()(x)
+        #    x = Dropout(dropout_rate)(x)
+        x = ResMax(64,1,0, upscale = False)(x)
+        x = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
+        x = BatchNormalization()(x)
+        stft2 = GlobalAveragePooling2D()(x)
+        if dp :
+            stft2 = Dropout(dp)(stft2)
+    
+#    concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, preg])
+#    d1 = layers.Dense(2, activation = 'relu')(concat1)
+    
+    if use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2, stft2])
+    if not use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([cqt2, stft2])
+    if use_mel and not use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, stft2])
+    if use_mel and use_cqt and not use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2])
+    if not use_mel and not use_cqt and use_stft :  ## stft 만
+        concat2 = stft2
+    if use_mel and not use_cqt and not use_stft :  ### mel만
+        concat2 = mel2
+    if not use_mel and use_cqt and not use_stft :  ### cqt만
+        concat2 = cqt2
+
+    if ext :
+        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, preg])
+        d1 = layers.Dense(2, activation = 'relu')(concat1)
+        concat2 = layers.Concatenate()([concat2, d1])
+        
+    if fc :
+        concat2 = layers.Dense(10, activation = 'relu')(concat2)
+        if dp :
+            concat2 = Dropout(dp)(concat2)
+
+    res1 = layers.Dense(3, activation = "softmax")(concat2)
+    res2 = layers.Dense(2, activation = "softmax")(concat2)
+
+    model = keras.Model(inputs = [age,sex,hw,preg,loc,mel1,cqt1,stft1] , outputs = res2 )
+    
+    model.compile(loss=['categorical_crossentropy'], optimizer='adam', metrics=['accuracy','AUC'])
+    return(model)

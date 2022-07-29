@@ -17,7 +17,7 @@ import tensorflow
 
 
 class Generator0():
-    def __init__(self, X_train, y_train, batch_size=32, beta_param=0.2, mixup = True, lowpass = False, highpass = False, ranfilter2 = False, shuffle=True, datagen=None):
+    def __init__(self, X_train, y_train, batch_size=32, beta_param=0.2, mixup = True, lowpass = False, highpass = False, ranfilter2 = False, shuffle=True, datagen=None, chaug = False):
         self.X_train = X_train
         self.y_train = y_train
         self.batch_size = batch_size
@@ -32,6 +32,7 @@ class Generator0():
         self.lowpass = lowpass
         self.highpass = highpass
         self.ranfilter = ranfilter2
+        self.chaug = chaug
 
 
     def __call__(self):
@@ -110,6 +111,9 @@ class Generator0():
                                         b1 = np.random.choice(ranf, size = 1)[0]
                                         loc1 = np.random.choice(h - b1, size = 1)[0]
                                         Xn[i, loc1:(loc1 + b1 - 1), :] = 0
+                        if self.chaug :
+                            noiselv = np.random.uniform(low= - self.chaug, high= self.chaug)
+                            Xn[i,:] += noiselv
                 X.append(Xn)
         else:
             if len(self.X_train.shape) == 4: 
@@ -208,7 +212,8 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     def __init__(self, X_train, y_train, batch_size=32, 
                  shuffle=True, 
                  cutmix = False, cutout = False, specaug = False, specmix = False,
-                 beta_param = False, lowpass = False, highpass = False, ranfilter = False, ranfilter2 = False, dropblock = False
+                 beta_param = False, lowpass = False, highpass = False, ranfilter = False,
+                 ranfilter2 = False, dropblock = False, chaug = False
                 ):
         'Initialization'
         self.X_train = X_train
@@ -227,6 +232,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         self.ranfilter = ranfilter
         self.ranfilter2 = ranfilter2
         self.dropblock = dropblock
+        self.chaug = chaug
 #        self.input_shape = input_shape
         
         self.on_epoch_end()
@@ -384,6 +390,12 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
                                 b1 = np.random.choice(ranf, size = 1)[0]
                                 loc1 = np.random.choice(nf - b1, size = 1)[0]
                                 nX[k][i, loc1:(loc1 + b1 - 1), :] = 0
+
+                if self.chaug :
+                    for i in range(self.batch_size) :
+                        noiselv = np.random.uniform(low= - self.chaug, high= self.chaug)
+                        nX[k][i,:] += noiselv
+                                
                     
         return nX, ny
     
