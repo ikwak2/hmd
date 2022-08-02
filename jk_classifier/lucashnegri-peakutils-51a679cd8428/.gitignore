@@ -1,0 +1,8 @@
+__pycache__
+build
+_build
+MANIFEST
+dist
+*egg*
+*.pyc
+.venv
