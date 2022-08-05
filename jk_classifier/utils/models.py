@@ -11,6 +11,7 @@ import tensorflow as tf
 
 
 
+
 def get_toy(mel_input_shape):
         # Create a towy model.
     age = keras.Input(shape=(6,), name = 'age_cat')
@@ -2363,7 +2364,7 @@ def get_LCNN_o_3_dr(mel_input_shape, cqt_input_shape, stft_input_shape, use_mel 
 
 
 
-def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,use_mel = True, use_cqt = True, use_stft = True, ord1 = True, dp = .5, fc = False, ext = False):
+def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape,use_mel = True, use_cqt = True, use_stft = True, ord1 = True, dp = .5, fc = False, ext = False):
         # Create a towy model.
     age = keras.Input(shape=(6,), name = 'age_cat')
     sex = keras.Input(shape=(2,), name = 'sex_cat')
@@ -2371,6 +2372,7 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
     preg = keras.Input(shape=(1,), name = 'is_preg')
     loc = keras.Input(shape=(5,), name = 'loc')
     interval = keras.Input(shape=interval_input_shape, name = 'interval')
+    wav2 = keras.Input(shape=wav2_input_shape, name = 'wav2')
     mel1 = keras.Input(shape=mel_input_shape, name = 'mel')
     cqt1 = keras.Input(shape=cqt_input_shape, name = 'cqt')
     stft1 = keras.Input(shape=stft_input_shape, name = 'stft')
@@ -2389,14 +2391,33 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
     
     ## interval embedding
     
-    lstm = tf.keras.layers.LSTM(20,return_sequences=True,use_bias=True, 
-                                dropout=0.1,recurrent_dropout=0.05)(interval)
+#     interval1 = tf.keras.layers.LSTM(20,return_sequences=True,use_bias=True, 
+#                                 dropout=0.1,recurrent_dropout=0.05)(interval)
+#     interval1 = tf.keras.layers.LSTM(15,return_sequences=False,use_bias=True, dropout=0.3,
+#                                 recurrent_dropout=0.05)(interval1)
+#     interval1 = layers.Dense(15, activation='relu')(interval1)
+#     interval1 = tf.keras.layers.Conv1D(20, 3, activation='relu')(interval)
+#     interval1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(interval1)
+#     interval1 = tf.keras.layers.GlobalAveragePooling1D()(interval1)
 
-    lstm = tf.keras.layers.LSTM(15,return_sequences=False,use_bias=True, dropout=0.3,
-                                recurrent_dropout=0.05)(lstm)
     
-    lstm = layers.Dense(15, activation='relu')(lstm)
+    interval1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(interval)
+    interval1 = tf.keras.layers.BatchNormalization(axis=1)(interval1)
+    interval1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(interval1)
+    interval1 = tf.keras.layers.BatchNormalization(axis=1)(interval1)
+    interval1 = tf.keras.layers.LSTM(10,return_sequences=False,use_bias=True, 
+                                dropout=0.1,recurrent_dropout=0.05)(interval1)    
+    interval1 = layers.Dense(3, activation='relu')(interval1)
     
+    ## wav2 embedding
+    
+    wav2_1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(wav2)
+    wav2_1 = tf.keras.layers.BatchNormalization(axis=1)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(wav2_1)
+    wav2_1 = tf.keras.layers.BatchNormalization(axis=1)(wav2_1)
+    wav2_1 = tf.keras.layers.LSTM(10,return_sequences=False,use_bias=True, 
+                                dropout=0.1,recurrent_dropout=0.05)(wav2_1)    
+    wav2_1 = layers.Dense(3, activation='relu')(wav2_1)
 
     ## mel embedding
     if use_mel :
@@ -2576,7 +2597,7 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
 
     if ext :
         
-        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, preg,lstm])
+        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, preg,interval1,wav2_1])
         d1 = layers.Dense(10, activation='relu')(concat1)
         concat2 = layers.Concatenate()([concat2, d1])
         
@@ -2592,7 +2613,7 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
         
 #     res2 = layers.Dense(2, activation = "softmax")(concat2)
 
-    model = keras.Model(inputs = [age,sex,hw,preg,loc,interval,mel1,stft1,cqt1] , outputs = res1 )
+    model = keras.Model(inputs = [age,sex,hw,preg,loc,interval,wav2,mel1,stft1,cqt1] , outputs = res1 )
     
     model.compile(loss=['categorical_crossentropy'], optimizer='adam', metrics=['accuracy','AUC'])
     return(model)

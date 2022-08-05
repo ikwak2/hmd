@@ -13,7 +13,12 @@ import scipy.io as sio
 from keras.preprocessing.sequence import pad_sequences
 sys.path.insert(0,'/home/jk21/Documents/hmd/jk_classifier/lucashnegri-peakutils-51a679cd8428')
 import peakutils
+from wav2vec2 import Wav2Vec2ForCTC, Wav2Vec2Config
+import tensorflow as tf
 
+config = Wav2Vec2Config()
+model = Wav2Vec2ForCTC(config)
+model.trainable=False
 
 def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100, trim = 4000):
 
@@ -312,8 +317,8 @@ def get_feature_one(patient_data, verbose = 0) :
 
 def get_features_3lb_all(data_folder, patient_files_trn, 
                           samp_sec=20, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100,
-                          filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,maxlen=30,min_dist=1000,
-                         use_mel = True, use_cqt = False, use_stft= False, use_raw = False,use_interval = False
+                          filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,maxlen1=120000,min_dist=1000,
+                         use_mel = True, use_cqt = False, use_stft= False, use_raw = False,use_interval = False,use_wav2=False
                          ) :
     features = dict()
     features['id'] = []
@@ -327,10 +332,13 @@ def get_features_3lb_all(data_folder, patient_files_trn,
     features['stft1'] = []
     features['raw1'] = []
     features['interval'] = []
+    features['wav2']=[]
 #    labels = []
     features['mm_labels'] = []
     features['out_labels'] = []
     tmp_interval=[]
+    tmp_wav=[]
+    interval_len=[]
 
     age_classes = ['Neonate', 'Infant', 'Child', 'Adolescent', 'Young Adult']
     recording_locations = ['AV', 'MV', 'PV', 'TV', 'PhC']
@@ -377,10 +385,17 @@ def get_features_3lb_all(data_folder, patient_files_trn,
             features['stft1'].append(np.array(mel3))
 
             if use_raw :
-                frequency1, recording1 = sp.io.wavfile.read(filename)
+                recording1,frequency1 = librosa.load(filename)
             else :
                 recording1 = np.zeros( (1) )
             features['raw1'].append(recording1)
+            
+            if use_wav2:
+                recording1,frequency1 = librosa.load(filename)
+            else :
+                recording1 = np.zeros( (1) )
+            tmp_wav.append(recording1)                
+                
             
             if use_interval :
                                
@@ -390,7 +405,7 @@ def get_features_3lb_all(data_folder, patient_files_trn,
                 try:
                     
                     X=datos[1]
-                    X=X[12000:-12000]
+                    X=X[trim*3:-trim*3]
                     Fs=datos[0]
             
                     Fpa20=filtros['Fpa20'];			        # High pass filter
@@ -573,7 +588,15 @@ def get_features_3lb_all(data_folder, patient_files_trn,
     
     if use_interval:
         
-        padded =pad_sequences(tmp_interval, maxlen=maxlen, dtype='float64', padding='pre', truncating='pre', value=0.0)
+        for i in range(len(tmp_interval)):
+            tmp_len = len(tmp_interval[i])
+            interval_len.append(tmp_len)
+        
+        
+        interval_len = np.array(interval_len)
+        max_interval_len = np.max(interval_len)
+        
+        padded =pad_sequences(tmp_interval, maxlen=max_interval_len, dtype='float64', padding='post', truncating='post', value=0.0)
         
         for i in range(len(padded)):
             features['interval'].append(padded[i])
@@ -591,12 +614,36 @@ def get_features_3lb_all(data_folder, patient_files_trn,
         for i in range(len(features['interval'])):
             features['interval'][i]= features['interval'][i].reshape(-1,1)
 
-     
     for k1 in features.keys() :
-        features[k1] = np.array(features[k1])    
+        features[k1] = np.array(features[k1])          
+
     
-    return features, mel_input_shape, cqt_input_shape, stft_input_shape
-
-
+    if use_wav2:
+        padded =pad_sequences(tmp_wav, maxlen=maxlen1, dtype='float64', padding='pre', truncating='pre', value=0.0)
+        tmp_pad = padded[:,np.newaxis,:]
+        
+        tmp=[]
+        for i in range(len(tmp_pad)):
+            tmp_feature = model(tmp_pad[i])
+            tmp.append(tmp_feature)
+            
+        tmp=np.array(tmp, dtype=np.float32)
+        new_tmp1=tmp.reshape(-1,374,32)
+        features['wav2']=new_tmp1
+        
+    
+    interval_input_shape = features['interval'].shape[1:]
+    
+    M,N = interval_input_shape
+    
+    print("interval: ", M,N)
+    
+    wav2_input_shape = features['wav2'].shape[1:]
+    
+    M,N = wav2_input_shape
+    
+    print("wav2: ", M,N)
+    
+    return features, mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape
 
 
