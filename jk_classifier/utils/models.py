@@ -3,7 +3,7 @@ from tensorflow.keras import layers
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten, maximum, DepthwiseConv2D, AveragePooling2D, UpSampling2D
 from tensorflow.keras.layers import Input, Conv1D,Conv2D, MaxPooling2D,MaxPooling1D, BatchNormalization, SpatialDropout2D
-from tensorflow.keras.layers import Convolution2D, GlobalAveragePooling2D, MaxPool2D, ZeroPadding2D,MaxPool1D
+from tensorflow.keras.layers import Convolution2D, GlobalAveragePooling2D, MaxPool2D, ZeroPadding2D,MaxPool1D,GlobalAveragePooling1D
 from tensorflow.keras.layers import add,concatenate
 from tensorflow.keras.activations import relu, softmax, swish
 import tensorflow
@@ -2401,23 +2401,21 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
 #     interval1 = tf.keras.layers.GlobalAveragePooling1D()(interval1)
 
     
-    interval1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(interval)
-    interval1 = tf.keras.layers.BatchNormalization(axis=1)(interval1)
-    interval1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(interval1)
-    interval1 = tf.keras.layers.BatchNormalization(axis=1)(interval1)
-    interval1 = tf.keras.layers.LSTM(10,return_sequences=False,use_bias=True, 
-                                dropout=0.1,recurrent_dropout=0.05)(interval1)    
+    interval1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(interval)
+    interval1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(interval1)
+    interval1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(interval1)
+    interval1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(interval1)
+    interval1 = tf.keras.layers.GlobalAveragePooling1D()(interval1)
     interval1 = layers.Dense(3, activation='relu')(interval1)
     
     ## wav2 embedding
-    
-    wav2_1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(wav2)
-    wav2_1 = tf.keras.layers.BatchNormalization(axis=1)(wav2_1)
-    wav2_1 = tf.keras.layers.Conv1D(10, 3, activation='relu')(wav2_1)
-    wav2_1 = tf.keras.layers.BatchNormalization(axis=1)(wav2_1)
-    wav2_1 = tf.keras.layers.LSTM(10,return_sequences=False,use_bias=True, 
-                                dropout=0.1,recurrent_dropout=0.05)(wav2_1)    
+    wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2)
+    wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
+    wav2_1 = tf.keras.layers.GlobalAveragePooling1D()(wav2_1)
     wav2_1 = layers.Dense(3, activation='relu')(wav2_1)
+    
 
     ## mel embedding
     if use_mel :

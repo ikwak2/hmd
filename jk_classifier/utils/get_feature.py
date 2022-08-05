@@ -317,7 +317,7 @@ def get_feature_one(patient_data, verbose = 0) :
 
 def get_features_3lb_all(data_folder, patient_files_trn, 
                           samp_sec=20, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100,
-                          filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,maxlen1=120000,min_dist=1000,
+                          filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,max_interval_len=115, maxlen1=120000,min_dist=1000,
                          use_mel = True, use_cqt = False, use_stft= False, use_raw = False,use_interval = False,use_wav2=False
                          ) :
     features = dict()
@@ -587,14 +587,6 @@ def get_features_3lb_all(data_folder, patient_files_trn,
     stft_input_shape = (M,N,1)
     
     if use_interval:
-        
-        for i in range(len(tmp_interval)):
-            tmp_len = len(tmp_interval[i])
-            interval_len.append(tmp_len)
-        
-        
-        interval_len = np.array(interval_len)
-        max_interval_len = np.max(interval_len)
         
         padded =pad_sequences(tmp_interval, maxlen=max_interval_len, dtype='float64', padding='post', truncating='post', value=0.0)
         
