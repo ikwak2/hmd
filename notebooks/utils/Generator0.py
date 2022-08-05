@@ -93,7 +93,7 @@ class Generator0():
                     X_l = l.reshape(self.batch_size, 1, 1, 1)
                     y_l = l.reshape(self.batch_size, 1)
                 elif len(X_temp.shape) == 3:
-                    _, h, w = self.X_train.shape
+                    _, h, w = self.X_temp.shape
                     l = np.random.beta(self.alpha, self.alpha, self.batch_size)
                     X_l = l.reshape(self.batch_size, 1, 1)
                     y_l = l.reshape(self.batch_size, 1)
