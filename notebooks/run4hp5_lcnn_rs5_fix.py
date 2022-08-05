@@ -295,11 +295,11 @@ for i in range(50000) :
     dp = 0 #np.random.choice([0, .1, .2, .3])
     fc = False #np.random.choice([True,False])
     ext = False
-    chaug = np.random.choice([0, 1, 5, 10, 30,100])
+    chaug = 10 #np.random.choice([0, 10])
     mixup = True #np.random.choice([True,False])
     cout = .8 #np.random.choice([0, 0.8])
     wunknown = 1 #np.random.choice([1, 0.7, .5, .2])
-    n1 = np.random.choice([0,2])
+    n1 = 0 #np.random.choice([0,2])
     if n1 == 0 :
         ranfil = False
     else :
@@ -564,7 +564,7 @@ for i in range(50000) :
     params_feature['min_th'] = min_th
 
     tnow = datetime.datetime.now()
-    fnm = 'res13/rec'+ str(tnow)+'.pk'
+    fnm = 'res14/rec'+ str(tnow)+'.pk'
 
     print(params_feature)
     
