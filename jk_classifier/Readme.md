@@ -10,7 +10,7 @@
 
 
 ##   WAVENET _Block 2개
- -  쓰레쉬 홀드 0.6일 때 
+```
 threshold:  0.6 
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
@@ -19,17 +19,5 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 #Outcome scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.718,0.720,0.612,0.639,0.799,10562.444
+```
 
-#Murmur scores (per class)
-Classes,Present,Unknown,Absent
-AUROC,0.957,0.500,0.856
-AUPRC,0.874,0.073,0.905
-F-measure,0.795,0.000,0.907
-Accuracy,0.921,0.000,0.914
-
-#Outcome scores (per class)
-Classes,Abnormal,Normal
-AUROC,0.718,0.718
-AUPRC,0.746,0.694
-F-measure,0.714,0.511
-Accuracy,0.878,0.387
