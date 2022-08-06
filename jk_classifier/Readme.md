@@ -1,10 +1,35 @@
-# Peak _ Detection 
- - 교수님께서 알려주신 사이트 https://github.com/kevinmgamboa/S1-S1-Phonocardiogram-Peak-Detection-Method-in-Python 에서 나온 방법을 참고하여 Detection 진행해봄
- - 쥬피터노트북 파일 Peak_Detection_연습 파일 확인. 실제로 잘 잡히는 듯함.
- - 하이퍼파라메터는 Min_distance 인것 같고 기본값은 min_distance =2000 인데 1000 값으로 바꾸니 실제로 좀 피크 디텍션 잘하는듯함.
- - 깃허브 클론 말고도 또 Peakutils 를 설치해야함.https://bitbucket.org/lucashnegri/peakutils/src/master/ 참고
-# 모델 결과
- - Peak Detection 한 후 interval 계산. 각 파일마다 길이가 달라 길이 맞춰서  array 형태로 인풋 진행.
- - Interval은 LSTM 층 쌓아서 모델 학습
- - 기존보다 성능이 조금 나아지긴함. (Wetighted accuracy = 0.787)
- - 평균을 내서 스칼라 값으로 진행해보는것, Con1d-Lstm  등 다른 학습모델 트레이닝 시도 진행 예정
+# 최적 파라메터 적용 
+ - 교수님께서 알려주신 최적 파라메터 적용.
+ - 피처부분 수정하여 재추출 완료.
+ - 제너레이터 적용 후 모델 학습 진행 됨.
+ - Wav2vec2 에서 나온 차원이 기존 (374,32) 였는데..멜스펙토그램 뽑을 때 윈랭스 홉랭스 참고하여 차원 바꾸니.. (32,374) 좀 더 학습이 잘되는 느낌적인 느낌(?)
+# interval ( 피크 디텍션 ) & wav2vec2 Feature  ->  WAVENET  
+ - 참고사이트 : https://velog.io/@changdaeoh/Convolutionforsequence
+ - LSTM 을 사용하면 학습 시간이 많이 소요 되어서 Conv1D 로 적용하는 방법을 찾아보다가 블로그 발견하여 적용해봄.
+ - dilated causal convolution 을 쌓아서 진행 . 몇개 블럭을 쌓을지는 여러가지 방법으로 시도 예정
+
+
+##   WAVENET _Block 2개
+ -  쓰레쉬 홀드 0.6일 때 
+threshold:  0.6 
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.771,0.617,0.568,0.848,0.814,17770.578
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.718,0.720,0.612,0.639,0.799,10562.444
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.957,0.500,0.856
+AUPRC,0.874,0.073,0.905
+F-measure,0.795,0.000,0.907
+Accuracy,0.921,0.000,0.914
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.718,0.718
+AUPRC,0.746,0.694
+F-measure,0.714,0.511
+Accuracy,0.878,0.387
