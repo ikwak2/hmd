@@ -2401,22 +2401,111 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
 #     interval1 = tf.keras.layers.GlobalAveragePooling1D()(interval1)
 
     
-    interval1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(interval)
-    interval1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(interval1)
-    interval1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(interval1)
-    interval1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(interval1)
-    interval1 = tf.keras.layers.GlobalAveragePooling1D()(interval1)
-    interval1 = layers.Dense(3, activation='relu')(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(interval)
+#     interval1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(interval1)
+#     interval1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(interval1)
+#     interval1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(interval1)
+#     interval1 = tf.keras.layers.GlobalAveragePooling1D()(interval1)
+#     interval1 = layers.Dense(3, activation='relu')(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)
+
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)    
+
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)
+    
+    interval1 = tf.keras.layers.GlobalMaxPooling1D()(interval1)
     
     ## wav2 embedding
-    wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2)
-    wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2_1)
-    wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
-    wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
-    wav2_1 = tf.keras.layers.GlobalAveragePooling1D()(wav2_1)
-    wav2_1 = layers.Dense(3, activation='relu')(wav2_1)
     
+    
+    #1))))
+    
+#     wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
+#     wav2_1 = tf.keras.layers.GlobalAveragePooling1D()(wav2_1)
+#     wav2_1 = layers.Dense(3, activation='relu')(wav2_1)
 
+    #2))))
+    
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(wav2)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(wav2_1)
+
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(wav2_1)
+#     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(wav2_1)
+    
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(wav2_1)
+    wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(wav2_1)
+    
+    
+    wav2_1 = tf.keras.layers.GlobalMaxPooling1D()(wav2_1) 
+
+#     wav2_1 = tf.keras.applications.MobileNetV2(input_shape=(224,224,3),alpha=1.0,
+#                                                include_top=False,
+#                                                weights="imagenet",
+#                                                pooling='avg',
+#                                                classes=1000,
+#                                                classifier_activation="softmax")(wav2)
+    
+    
     ## mel embedding
     if use_mel :
         
@@ -2595,9 +2684,9 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
 
     if ext :
         
-        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, preg,interval1,wav2_1])
+        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, interval1,preg])
         d1 = layers.Dense(10, activation='relu')(concat1)
-        concat2 = layers.Concatenate()([concat2, d1])
+        concat2 = layers.Concatenate()([concat2, d1,wav2_1])
         
     if fc :
         concat2 = layers.Dense(10, activation = "relu")(concat2)
@@ -2605,9 +2694,15 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
         
     if ord1 :
         res1 = layers.Dense(2, activation = "softmax")(concat2)
+        
+        
+
+        
     else :
         res1 = layers.Dense(3, activation = "softmax")(concat2)
 
+        
+        
         
 #     res2 = layers.Dense(2, activation = "softmax")(concat2)
 

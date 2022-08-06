@@ -17,7 +17,7 @@ import tensorflow
 
 
 class Generator0():
-    def __init__(self, X_train, y_train, batch_size=32, beta_param=0.2, mixup = True, lowpass = False, highpass = False, ranfilter2 = False, shuffle=True, datagen=None):
+    def __init__(self, X_train, y_train, batch_size=32, beta_param=0.2, mixup = True, lowpass = False, highpass = False, ranfilter2 = False, shuffle=True, datagen=None, chaug = False, cout = False):
         self.X_train = X_train
         self.y_train = y_train
         self.batch_size = batch_size
@@ -32,6 +32,8 @@ class Generator0():
         self.lowpass = lowpass
         self.highpass = highpass
         self.ranfilter = ranfilter2
+        self.chaug = chaug
+        self.cutout = cout        
 
 
     def __call__(self):
@@ -54,6 +56,32 @@ class Generator0():
         return indexes
 
     def __data_generation(self, batch_ids):
+        
+        
+        def get_box(lambda_value, nf, nt):
+            cut_rat = np.sqrt(1.0 - lambda_value)
+
+            cut_w = int(nf * cut_rat)  # rw
+            cut_h = int(nt * cut_rat)  # rh
+
+            cut_x = int(np.random.uniform(low=0, high=nf))  # rx
+            cut_y = int(np.random.uniform(low=0, high=nt))  # ry
+
+            boundaryx1 = np.minimum(np.maximum(cut_x - cut_w // 2, 0), nf) #tf.clip_by_value(cut_x - cut_w // 2, 0, IMG_SIZE_x)
+            boundaryy1 = np.minimum(np.maximum(cut_y - cut_h // 2, 0), nt) #tf.clip_by_value(cut_y - cut_h // 2, 0, IMG_SIZE_y)
+            bbx2 = np.minimum(np.maximum(cut_x + cut_w // 2, 0), nf) #tf.clip_by_value(cut_x + cut_w // 2, 0, IMG_SIZE_x)
+            bby2 = np.minimum(np.maximum(cut_y + cut_h // 2, 0), nt) #tf.clip_by_value(cut_y + cut_h // 2, 0, IMG_SIZE_y)
+
+            target_h = bby2 - boundaryy1
+            if target_h == 0:
+                target_h += 1
+
+            target_w = bbx2 - boundaryx1
+            if target_w == 0:
+                target_w += 1
+
+            return boundaryx1, boundaryy1, target_h, target_w           
+        
         
         if isinstance(self.X_train, list):
             X = []
@@ -88,29 +116,37 @@ class Generator0():
                     Xn = X1
                 if len(X_temp.shape) == 4: 
                     _, h, w, c = X_temp.shape
-                    if self.lowpass :
-                        uv, lp = self.lowpass
-                        dec1 = np.random.choice(2, size = self.batch_size)
-                        for i in range(self.batch_size) :
-                            if dec1[i] == 1 :
+                    if h != 1 :
+                        if self.lowpass :
+                            uv, lp = self.lowpass
+                            dec1 = np.random.choice(2, size = self.batch_size)
+                            for i in range(self.batch_size) :
                                 loc1 = np.random.choice(lp, size = 1)[0]
                                 Xn[i,:loc1,:,:] = 0
-                    if self.highpass :
-                        uv, hp = self.highpass
-                        dec1 = np.random.choice(2, size = self.batch_size)
-                        for i in range(self.batch_size) :
-                            if dec1[i] == 1 :
+                        if self.highpass :
+                            uv, hp = self.highpass
+                            dec1 = np.random.choice(2, size = self.batch_size)
+                            for i in range(self.batch_size) :
                                 loc1 = np.random.choice(hp, size = 1)[0]
                                 Xn[i,loc1:,:,:] = 0
-                    if self.ranfilter :                
-                        raniter, ranf = self.ranfilter
-                        dec1 = np.random.choice(raniter, size = self.batch_size)
-                        for i in range(self.batch_size) :
-                            if dec1[i] > 0 :
-                                for j in range(dec1[i]) :
-                                    b1 = np.random.choice(ranf, size = 1)[0]
-                                    loc1 = np.random.choice(h - b1, size = 1)[0]
-                                    Xn[i, loc1:(loc1 + b1 - 1), :] = 0
+                        if self.ranfilter :                
+                            raniter, ranf = self.ranfilter
+                            dec1 = np.random.choice(raniter, size = self.batch_size)
+                            for i in range(self.batch_size) :
+                                if dec1[i] > 0 :
+                                    for j in range(dec1[i]) :
+                                        b1 = np.random.choice(ranf, size = 1)[0]
+                                        loc1 = np.random.choice(h - b1, size = 1)[0]
+                                        Xn[i, loc1:(loc1 + b1 - 1), :] = 0
+                        if self.chaug :
+                            for i in range(self.batch_size) :
+                                noiselv = np.random.uniform(low= - self.chaug, high= self.chaug)
+                                Xn[i,:] += noiselv
+                        if self.cutout :
+                            lambda1 = np.random.beta(self.cutout, self.cutout, size = self.batch_size)   ## beta_param default : 0.7  STC페이퍼 추천은 0.6~0.8
+                            for i in range(self.batch_size) :
+                                boundaryx1, boundaryy1, target_h, target_w = get_box(lambda1[i], h, w)
+                                Xn[i, boundaryx1:(boundaryx1+target_h), boundaryy1:(boundaryy1+target_w),: ] = 0
                 
 #                 if len(X_temp.shape) == 3: 
                     
@@ -152,12 +188,12 @@ class Generator0():
                 X_l = l.reshape(self.batch_size, 1, 1)
                 y_l = l.reshape(self.batch_size, 1)
             elif len(self.X_train.shape) == 2:
-                _, h = X_temp.shape
+                _, h = self.X_train.shape
                 l = np.random.beta(self.alpha, self.alpha, self.batch_size)
                 X_l = l.reshape(self.batch_size, 1)
                 y_l = l.reshape(self.batch_size, 1)
             elif len(self.X_train.shape) == 1:
-                _= X_temp.shape
+                _= self.X_train.shape
                 l = np.random.beta(self.alpha, self.alpha, self.batch_size)
                 X_l = l.reshape(self.batch_size,)
                 y_l = l.reshape(self.batch_size, 1)
@@ -175,16 +211,14 @@ class Generator0():
                     uv, lp = self.lowpass
                     dec1 = np.random.choice(2, size = self.batch_size)
                     for i in range(self.batch_size) :
-                        if dec1[i] == 1 :
-                            loc1 = np.random.choice(lp, size = 1)[0]
-                            Xn[i,:loc1,:,:] = 0
+                        loc1 = np.random.choice(lp, size = 1)[0]
+                        Xn[i,:loc1,:,:] = 0
                 if self.highpass :
                     uv, hp = self.highpass
                     dec1 = np.random.choice(2, size = self.batch_size)
                     for i in range(self.batch_size) :
-                        if dec1[i] == 1 :
-                            loc1 = np.random.choice(hp, size = 1)[0]
-                            Xn[i,loc1:,:,:] = 0
+                        loc1 = np.random.choice(hp, size = 1)[0]
+                        Xn[i,loc1:,:,:] = 0
                 if self.ranfilter :                
                     raniter, ranf = self.ranfilter
                     dec1 = np.random.choice(raniter, size = self.batch_size)
