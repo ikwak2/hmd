@@ -9,7 +9,7 @@
  - dilated causal convolution 을 쌓아서 진행 . 몇개 블럭을 쌓을지는 여러가지 방법으로 시도 예정
 
 
-##   WAVENET _Block 2개
+####   WAVENET _Block 2개
 ```
 threshold:  0.6 
 #Murmur scores
@@ -20,4 +20,3 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.718,0.720,0.612,0.639,0.799,10562.444
 ```
-
