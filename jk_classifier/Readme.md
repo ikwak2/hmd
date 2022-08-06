@@ -22,6 +22,7 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 ```
 #### WAVENET_Block 1개
 ```
+threshold:  0.45
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.771,0.619,0.520,0.785,0.792,16353.014
