@@ -58,3 +58,16 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.734,0.744,0.644,0.670,0.837,9904.543
 ```
+
+# Wav2Vec2 Feature 를 이미치 처리 -> ResNet50 V2 에 넣어봄.
+- cost가 더 떨어질까봐 시도해봤는데 생각보다 많이 떨어지지는 않음.
+```
+threshold:  0.5
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.756,0.590,0.534,0.812,0.774,16940.728
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.687,0.664,0.525,0.565,0.748,11964.332
+```
