@@ -3090,7 +3090,7 @@ def get_LCNN_o_4_dr_2(mel_input_shape, cqt_input_shape, stft_input_shape,interva
     
     wav2_1 = Conv2D(3,(3,3),padding='same')(wav2)
     wav2_2 = MobileNet2(wav2_1)
-    wav2_2.trainable=False
+
     
     
     
