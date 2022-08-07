@@ -44,3 +44,17 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.688,0.701,0.374,0.529,0.846,14495.049
 ```
 
+# wav2vec2 feature를 이미지 처리 -> mobilenetv2
+ - 이미지 처리 하기 위해서 2차원 wav2vec2 feature에서 차원 축 추가
+ - mobilenetv2에 맞게 이미지 리사이징 
+ - 기존 모델에서 mobilenetv2 추가 후 학습 진행 
+ - weighted accuracy 는 그렇게 높지 않지만, cost가 9900 으로 떨어짐. 
+```
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.758,0.608,0.509,0.780,0.757,16548.052
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.734,0.744,0.644,0.670,0.837,9904.543
+```
