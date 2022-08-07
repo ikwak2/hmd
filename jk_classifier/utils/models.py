@@ -2713,3 +2713,591 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
 
 
 
+def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape,use_mel = True, use_cqt = True, use_stft = True, ord1 = True, dp = .5, fc = False, ext = False):
+        # Create a towy model.
+    
+    from keras.models import Model
+    from keras.layers import Input 
+    
+    MobileNet2 = tf.keras.applications.MobileNetV2(
+    input_shape=(128,128,3),
+    alpha=1.0,
+    include_top=False,
+    weights="imagenet",
+    input_tensor=None,
+    pooling='avg',
+    classes=3,
+    classifier_activation="softmax")
+    
+    age = keras.Input(shape=(6,), name = 'age_cat')
+    sex = keras.Input(shape=(2,), name = 'sex_cat')
+    hw = keras.Input(shape=(2,), name = 'height_weight')
+    preg = keras.Input(shape=(1,), name = 'is_preg')
+    loc = keras.Input(shape=(5,), name = 'loc')
+    interval = keras.Input(shape=interval_input_shape, name = 'interval')
+    wav2 = keras.Input(shape=wav2_input_shape, name = 'wav2')
+    mel1 = keras.Input(shape=mel_input_shape, name = 'mel')
+    cqt1 = keras.Input(shape=cqt_input_shape, name = 'cqt')
+    stft1 = keras.Input(shape=stft_input_shape, name = 'stft')
+        
+    ## age embeddig
+    age1 = layers.Dense(2, activation = None)(age)
+
+    ## sex embedding
+    sex1 = layers.Dense(1, activation = None)(sex)
+
+    ## hw embedding
+    hw1 = layers.Dense(1, activation = None)(hw)
+
+    ## loc embedding
+    loc1 = layers.Dense(3, activation = None)(loc)
+    
+    ## interval embedding
+
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)
+
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)    
+
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)
+    
+    interval1 = tf.keras.layers.GlobalMaxPooling1D()(interval1)
+    
+    #### Wav2Vec2 Embedding
+    
+    wav2_1 = Conv2D(3,(3,3),padding='same')(wav2)
+    wav2_2 = MobileNet2(wav2_1)
+    wav2_2.trainable=False
+    
+    
+    
+    ## mel embedding
+    if use_mel :
+        
+        conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(mel1)
+        conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(mel1)
+        mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
+        max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
+
+        conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
+        batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
+
+        conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
+
+        max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
+        batch10 = BatchNormalization(axis=3, scale=False)(max9)
+
+        conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
+        batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
+
+        conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
+
+        max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
+
+        conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
+        batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
+
+        conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
+        batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
+
+        conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
+        batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
+
+        conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
+
+        max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
+        mel2 = layers.GlobalAveragePooling2D()(max28)
+        mel2 = Dropout(dp)(mel2)
+
+    if use_cqt:
+        ## cqt embedding
+        conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(cqt1)
+        conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(cqt1)
+        mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
+        max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
+        
+        conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
+        batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
+
+        conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
+
+        max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
+        batch10 = BatchNormalization(axis=3, scale=False)(max9)
+
+        conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
+        batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
+
+        conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
+
+        max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
+
+        conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
+        batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
+
+        conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
+        batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
+
+        conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
+        batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
+
+        conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
+        
+        max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
+        cqt2 = layers.GlobalAveragePooling2D()(max28)
+        cqt2 = Dropout(dp)(cqt2)
+
+    if use_stft :
+        ## stft embedding
+        conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(stft1)
+        conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(stft1)
+        mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
+        max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
+        
+        conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
+        batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
+        
+        conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
+        
+        max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
+        batch10 = BatchNormalization(axis=3, scale=False)(max9)
+        
+        conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
+        batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
+
+        conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
+        
+        max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
+
+        conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
+        batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
+
+        conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
+        batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
+
+        conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
+        batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
+
+        conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
+        
+        max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
+        stft2 = layers.GlobalAveragePooling2D()(max28)
+        stft2 = Dropout(dp)(stft2)
+    
+    
+    if use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2, stft2])
+    if not use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([cqt2, stft2])
+    if use_mel and not use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, stft2])
+    if use_mel and use_cqt and not use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2])
+    if not use_mel and not use_cqt and use_stft :  ## stft 만
+        concat2 = stft2
+    if use_mel and not use_cqt and not use_stft :  ### mel만
+        concat2 = mel2
+    if not use_mel and use_cqt and not use_stft :  ### cqt만
+        concat2 = cqt2
+
+    if ext :
+        
+        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, interval1,preg])
+        d1 = layers.Dense(10, activation='relu')(concat1)
+        concat2 = layers.Concatenate()([concat2, d1,wav2_2])
+        
+    if fc :
+        concat2 = layers.Dense(10, activation = "relu")(concat2)
+        concat2 = Dropout(dp)(concat2)
+        
+    if ord1 :
+        res1 = layers.Dense(2, activation = "softmax")(concat2)
+        
+        
+
+        
+    else :
+        res1 = layers.Dense(3, activation = "softmax")(concat2)
+
+        
+        
+        
+#     res2 = layers.Dense(2, activation = "softmax")(concat2)
+
+    model = keras.Model(inputs = [age,sex,hw,preg,loc,interval,wav2,mel1,stft1,cqt1] , outputs = res1 )
+    
+    model.compile(loss=['categorical_crossentropy'], optimizer='adam', metrics=['accuracy','AUC'])
+    return(model)
+
+
+
+def get_LCNN_o_4_dr_2(mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape,use_mel = True, use_cqt = True, use_stft = True, ord1 = True, dp = .5, fc = False, ext = False):
+        # Create a towy model.
+    
+    from keras.models import Model
+    from keras.layers import Input 
+    
+    MobileNet2 = tf.keras.applications.MobileNetV2(
+    input_shape=(128,128,3),
+    alpha=1.0,
+    include_top=False,
+    weights="imagenet",
+    input_tensor=None,
+    pooling='avg',
+    classes=2,
+    classifier_activation="softmax")
+    
+    age = keras.Input(shape=(6,), name = 'age_cat')
+    sex = keras.Input(shape=(2,), name = 'sex_cat')
+    hw = keras.Input(shape=(2,), name = 'height_weight')
+    preg = keras.Input(shape=(1,), name = 'is_preg')
+    loc = keras.Input(shape=(5,), name = 'loc')
+    interval = keras.Input(shape=interval_input_shape, name = 'interval')
+    wav2 = keras.Input(shape=wav2_input_shape, name = 'wav2')
+    mel1 = keras.Input(shape=mel_input_shape, name = 'mel')
+    cqt1 = keras.Input(shape=cqt_input_shape, name = 'cqt')
+    stft1 = keras.Input(shape=stft_input_shape, name = 'stft')
+        
+    ## age embeddig
+    age1 = layers.Dense(2, activation = None)(age)
+
+    ## sex embedding
+    sex1 = layers.Dense(1, activation = None)(sex)
+
+    ## hw embedding
+    hw1 = layers.Dense(1, activation = None)(hw)
+
+    ## loc embedding
+    loc1 = layers.Dense(3, activation = None)(loc)
+    
+    ## interval embedding
+
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)
+
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+#     interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)    
+
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=2)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=4)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=8)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=16)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=32)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=64)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=128)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=256)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(interval1)
+    interval1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(interval1)
+    
+    interval1 = tf.keras.layers.GlobalMaxPooling1D()(interval1)
+    
+    #### Wav2Vec2 Embedding
+    
+    wav2_1 = Conv2D(3,(3,3),padding='same')(wav2)
+    wav2_2 = MobileNet2(wav2_1)
+    wav2_2.trainable=False
+    
+    
+    
+    ## mel embedding
+    if use_mel :
+        
+        conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(mel1)
+        conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(mel1)
+        mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
+        max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
+
+        conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
+        batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
+
+        conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
+
+        max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
+        batch10 = BatchNormalization(axis=3, scale=False)(max9)
+
+        conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
+        batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
+
+        conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
+
+        max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
+
+        conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
+        batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
+
+        conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
+        batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
+
+        conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
+        batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
+
+        conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
+
+        max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
+        mel2 = layers.GlobalAveragePooling2D()(max28)
+        mel2 = Dropout(dp)(mel2)
+
+    if use_cqt:
+        ## cqt embedding
+        conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(cqt1)
+        conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(cqt1)
+        mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
+        max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
+        
+        conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
+        batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
+
+        conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
+
+        max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
+        batch10 = BatchNormalization(axis=3, scale=False)(max9)
+
+        conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
+        batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
+
+        conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
+
+        max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
+
+        conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
+        batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
+
+        conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
+        batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
+
+        conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
+        batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
+
+        conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
+        
+        max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
+        cqt2 = layers.GlobalAveragePooling2D()(max28)
+        cqt2 = Dropout(dp)(cqt2)
+
+    if use_stft :
+        ## stft embedding
+        conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(stft1)
+        conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(stft1)
+        mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
+        max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
+        
+        conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+        mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
+        batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
+        
+        conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+        mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
+        
+        max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
+        batch10 = BatchNormalization(axis=3, scale=False)(max9)
+        
+        conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+        mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
+        batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
+
+        conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+        mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
+        
+        max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
+
+        conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+        mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
+        batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
+
+        conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+        mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
+        batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
+
+        conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+        mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
+        batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
+
+        conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+        mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
+        
+        max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
+        stft2 = layers.GlobalAveragePooling2D()(max28)
+        stft2 = Dropout(dp)(stft2)
+    
+    
+    if use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2, stft2])
+    if not use_mel and use_cqt and use_stft :
+        concat2 = layers.Concatenate()([cqt2, stft2])
+    if use_mel and not use_cqt and use_stft :
+        concat2 = layers.Concatenate()([mel2, stft2])
+    if use_mel and use_cqt and not use_stft :
+        concat2 = layers.Concatenate()([mel2, cqt2])
+    if not use_mel and not use_cqt and use_stft :  ## stft 만
+        concat2 = stft2
+    if use_mel and not use_cqt and not use_stft :  ### mel만
+        concat2 = mel2
+    if not use_mel and use_cqt and not use_stft :  ### cqt만
+        concat2 = cqt2
+
+    if ext :
+        
+        concat1 = layers.Concatenate()([age1, sex1, hw1, loc1, interval1,preg])
+        d1 = layers.Dense(10, activation='relu')(concat1)
+        concat2 = layers.Concatenate()([concat2, d1,wav2_2])
+        
+    if fc :
+        concat2 = layers.Dense(10, activation = "relu")(concat2)
+        concat2 = Dropout(dp)(concat2)
+        
+    if ord1 :
+        res1 = layers.Dense(2, activation = "softmax")(concat2)
+        
+        
+
+        
+    else :
+        res1 = layers.Dense(3, activation = "softmax")(concat2)
+
+        
+        
+        
+#     res2 = layers.Dense(2, activation = "softmax")(concat2)
+
+    model = keras.Model(inputs = [age,sex,hw,preg,loc,interval,wav2,mel1,stft1,cqt1] , outputs = res1 )
+    
+    model.compile(loss=['categorical_crossentropy'], optimizer='adam', metrics=['accuracy','AUC'])
+    return(model)
+
+
+
