@@ -20,7 +20,7 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.718,0.720,0.612,0.639,0.799,10562.444
 ```
-### WAVENET_Block 2개 & Wav2Vec2 피처 제외 
+#### WAVENET_Block 2개 & Wav2Vec2 피처 제외 
 ```
 threshold:  0.55
 #Murmur scores
@@ -31,12 +31,6 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.709,0.703,0.467,0.565,0.837,12676.239
 ```
-#Murmur scores (per class)
-Classes,Present,Unknown,Absent
-AUROC,0.949,0.500,0.845
-AUPRC,0.872,0.073,0.915
-F-measure,0.829,0.000,0.916
-Accuracy,0.895,0.000,0.942
 
 #### WAVENET_Block 3개
 ```
