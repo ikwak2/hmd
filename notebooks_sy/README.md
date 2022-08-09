@@ -16,7 +16,7 @@
 threshold:  0.75
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
-0.723,0.544,0.420,0.634,0.734,13963.775
+0.723,0.544,0.420,0.634,0.774,13963.775
 
 #Outcome scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
