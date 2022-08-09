@@ -10,8 +10,8 @@
 ## 2022.08.09. 화
 * LCNN_fix 파일 + qrs
 * LCNN_fix 파일 + qrs seq : 너무 오랜 시간 소요됨
-* LCNN_fix 파일 + wav2vac2 (lstm)
-* LCNN_fix 파일 + wav2vac2 (1D CNN) : LSTM 보다는 성능이 좋았으나, 교수님께서 올려주신 LCNN보다 성능 큰 성능 향상은 없었음
+* LCNN_fix 파일 + wav2vec2 (lstm)
+* LCNN_fix 파일 + wav2vec2 (1D CNN) : LSTM 보다는 성능이 좋았으나, 교수님께서 올려주신 LCNN보다 성능 큰 성능 향상은 없었음
 ```
 threshold:  0.75
 #Murmur scores

@@ -1,0 +1,2 @@
+model_checkpoint_path: "lcnn2"
+all_model_checkpoint_paths: "lcnn2"

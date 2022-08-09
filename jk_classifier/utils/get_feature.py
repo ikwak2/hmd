@@ -13,12 +13,8 @@ import scipy.io as sio
 from keras.preprocessing.sequence import pad_sequences
 sys.path.insert(0,'/home/jk21/Documents/hmd/jk_classifier/lucashnegri-peakutils-51a679cd8428')
 import peakutils
-from wav2vec2 import Wav2Vec2ForCTC, Wav2Vec2Config
-import tensorflow as tf
 
-config = Wav2Vec2Config()
-model = Wav2Vec2ForCTC(config)
-model.trainable=False
+
 
 def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100, trim = 0):
 
@@ -344,7 +340,7 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
                              filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,
                              use_mel = True, use_cqt = False, use_stft = False, 
                              use_raw = False,use_interval=False,use_wav2=False
-                             ,max_interval_len=115, maxlen1=120000,min_dist=1000
+                             ,max_interval_len=229, maxlen1=120000,min_dist=500,per_sec=4000
                          ) :
     features = dict()
     features['id'] = []
@@ -361,9 +357,9 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
     features['wav2']=[]
     features['mm_labels'] = []
     features['out_labels'] = []
-    tmp_interval=[]
+
     tmp_wav=[]
-    
+    tmp_total_interval = [] 
     
     features['mm_labels'] = []
     features['out_labels'] = []    
@@ -373,12 +369,13 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
 
     num_patient_files = len(patient_files_trn)
 
-    for i in range(num_patient_files):
+    for i in tqdm.tqdm(range(num_patient_files)):
 
         # Load the current patient data and recordings.
         current_patient_data = load_patient_data(patient_files_trn[i])
         num_locations = get_num_locations(current_patient_data)
         recording_information = current_patient_data.split('\n')[1:num_locations+1]
+        
         for j in range(num_locations) :
             entries = recording_information[j].split(' ')
             recording_file = entries[2]
@@ -418,88 +415,94 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
             
             
             if use_wav2:
-                recording1,frequency1 = librosa.load(filename)
+                frequency1, recording1 = sp.io.wavfile.read(filename)
+                
             else :
                 recording1 = np.zeros( (1) )
             tmp_wav.append(recording1)                  
             
             
             if use_interval :
-                               
+                
                 datos=sp.io.wavfile.read(filename)
                 filtros=sio.loadmat('./Filters1')
+                tmp_interval = []
+                n_samp = len(datos[1])//4000
+                               
                 
                 try:
+                    for k in range(n_samp):
+                        X = datos[1][k*per_sec:(k+1)*per_sec]
+                        Fs= datos[0]
+                        Fpa20=filtros['Fpa20'];			        # High pass filter
+                        Fpa20=Fpa20[0];					# High pass filter
+                        Fpb100=filtros['Fpb100'];		        # Low-pass Filter
+                        Fpb100=Fpb100[0];				# Low-pass Filter
+                        Xf=FpassBand(X,Fpa20,Fpb100); 	                # Apply a passband filter
+                        Xf=vec_nor(Xf);			
+            
+            # Derivate of the Signal
+                        dX=derivate(Xf);				# Derivate of the signal
+                        dX=vec_nor(dX);					# Vector Normalizing
+            # Square of the signal
+                        dy=np.square(Xf);
+                        dy=vec_nor(dy);
                     
-                    X=datos[1]
-                    X=X[trim*3:-trim*3]
-                    Fs=datos[0]
-            
-                    Fpa20=filtros['Fpa20'];			        # High pass filter
-                    Fpa20=Fpa20[0];					# High pass filter
-                    Fpb100=filtros['Fpb100'];		        # Low-pass Filter
-                    Fpb100=Fpb100[0];				# Low-pass Filter
-            
-                    Xf=FpassBand(X,Fpa20,Fpb100); 	                # Apply a passband filter
-                    Xf=vec_nor(Xf);			
-            
-                    # Derivate of the Signal
-                    dX=derivate(Xf);				# Derivate of the signal
-                    dX=vec_nor(dX);					# Vector Normalizing
-                    # Square of the signal
-                    dy=np.square(Xf);
-                    dy=vec_nor(dy);
-                    
-                    size=np.shape(Xf)				# Rank or dimension of the array
-                    fil=size[0];					# Number of rows
+                        size=np.shape(Xf)				# Rank or dimension of the array
+                        fil=size[0];					# Number of rows
 
-                    positive=np.zeros((1,fil+1));                   # Initializating Positives Values Vector 
-                    positive=positive[0];                           # Getting the Vector
+                        positive=np.zeros((1,fil+1));                   # Initializating Positives Values Vector 
+                        positive=positive[0];                           # Getting the Vector
 
-                    points=np.zeros((1,fil));                       # Initializating the all Peak Points Vector
-                    points=points[0];                               # Getting the point vector
+                        points=np.zeros((1,fil));                       # Initializating the all Peak Points Vector
+                        points=points[0];                               # Getting the point vector
 
-                    peaks=np.zeros((1,fil));                        # Initializating the s1-s1 Peak Vector
-                    peaks=peaks[0];                                 # Getting the point vector
+                        peaks=np.zeros((1,fil));                        # Initializating the s1-s1 Peak Vector
+                        peaks=peaks[0];                                 # Getting the point vector
 
             
-                    for i in range(0,fil):
-                        if dX[i]>0:
-                            positive[i]=1;
-                        else:
-                            positive[i]=0;
+                        for i in range(0,fil):
+                            if dX[i]>0:
+                                positive[i]=1;
+                            else:
+                                positive[i]=0;
+    
+                        for i in range(0,fil):
+                            if (positive[i]==1 and positive[i+1]==0):
+                                points[i]=Xf[i];
+                            else:
+                                points[i]=0;
 
-                    for i in range(0,fil):
-                        if (positive[i]==1 and positive[i+1]==0):
-                            points[i]=Xf[i];
-                        else:
-                            points[i]=0;
+                        indexes=peakutils.indexes(points,thres=0.5/max(points), min_dist=min_dist);
+                        lenght=np.shape(indexes)			# Get the length of the index vector		
+                        lenght=lenght[0];				# Get the value of the index vector
 
-                    indexes=peakutils.indexes(points,thres=0.5/max(points), min_dist=1000);
-                    lenght=np.shape(indexes)			# Get the length of the index vector		
-                    lenght=lenght[0];				# Get the value of the index vector
-
-                    for i in range(0,lenght):
-                        p=indexes[i];
-                        peaks[p]=points[p];
+                        for i in range(0,lenght):
+                            p=indexes[i];
+                            peaks[p]=points[p];
         
-                    n=np.arange(0,fil);                            # Vector to the X axes (Number of Samples)
-            
-                    tmp_peaks = np.diff(indexes)
+                        n=np.arange(0,fil);                            # Vector to the X axes (Number of Samples)
+                        indexes =indexes+(k*per_sec)    
+                        tmp_peaks = np.array(indexes)
                     
                     
-                    tmp_interval.append(tmp_peaks)
+                        tmp_interval.extend(tmp_peaks)
                     
+                    tmp_interval = np.array(tmp_interval)
+                    tmp_interval = np.diff(tmp_interval)
+                    
+                    tmp_total_interval.append(tmp_interval)
+ 
            
                 except:
                     print(filename)
-                    tmp_peaks = np.zeros(maxlen)
-                    tmp_interval.append(tmp_peaks)
+                    tmp_peaks = np.zeros(max_interval_len)
+                    tmp_total_interval.append(tmp_peaks)
                     
             else :
                         
-                tmp_peaks = np.zeros(maxlen)
-                tmp_interval.append(tmp_peaks)            
+                tmp_peaks = np.zeros(max_interval_len)
+                tmp_total_interval.append(tmp_peaks)            
             
             
             # Extract age_group
@@ -577,6 +580,8 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
             features['mm_labels'].append(current_mm_labels)
             features['out_labels'].append(current_out_labels)
 
+      
+    
     if use_mel :
         M, N = features['mel1'][0].shape
         for i in range(len(features['mel1'])) :
@@ -609,17 +614,18 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
         M, N ,__= features['stft1'][0].shape
     print("stft: ", M,N)
     stft_input_shape = (M,N,1)
+ 
     
     if use_interval:
         
-        padded =pad_sequences(tmp_interval, maxlen=max_interval_len, dtype='float64', padding='post', truncating='post', value=0.0)
+        padded =pad_sequences(tmp_total_interval, maxlen=max_interval_len, dtype='float32', padding='post', truncating='post', value=0.0)
         
         for i in range(len(padded)):
             features['interval'].append(padded[i])
         
     else:
         for i in range(len(tmp_interval)):
-            features['interval'].append(tmp_interval[i])
+            features['interval'].append(tmp_total_interval[i])
 
     if use_interval:
         
@@ -631,21 +637,13 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
             features['interval'][i]= features['interval'][i].reshape(-1,1)
 
     for k1 in features.keys() :
-        features[k1] = np.array(features[k1])          
-
+        features[k1] = np.array(features[k1])   
     
     if use_wav2:
         padded =pad_sequences(tmp_wav, maxlen=maxlen1, dtype='float64', padding='post', truncating='post', value=0.0)
-        tmp_pad = padded[:,np.newaxis,:]
-        
-        tmp=[]
-        for i in range(len(tmp_pad)):
-            tmp_feature = model(tmp_pad[i])
-            tmp.append(tmp_feature)
-            
-        tmp=np.array(tmp, dtype=np.float32)
-        new_tmp1=tmp.reshape(-1,32,374)
-        features['wav2']=new_tmp1
+    
+        padded=np.array(padded, dtype=np.float32)
+        features['wav2']=padded
         
     
     interval_input_shape = features['interval'].shape[1:]
@@ -656,9 +654,12 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
     
     wav2_input_shape = features['wav2'].shape[1:]
     
-    M,N = wav2_input_shape
+    M = wav2_input_shape
     
-    print("wav2: ", M,N)
+    print("wav2: ", M)
+    
+    for k1 in features.keys() :
+        features[k1] = np.array(features[k1])  
     
     return features, mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape
 
