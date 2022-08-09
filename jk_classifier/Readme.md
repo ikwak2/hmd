@@ -110,3 +110,16 @@ AUPRC,0.769,0.706
 F-measure,0.690,0.139
 Accuracy,0.990,0.075
 ```
+# Interval(1sec) & Wav2Vec2_Pretrained & Except mel ->  LCNN
+- 성능이 낮음.
+- Trainable = False로 진행(메모리부족, 도커에서 True 해서 학습 진행중)
+- Wav2Vec2  & Dense 추가하여서 실험해볼 예정
+```
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.701,0.546,0.453,0.733,0.625,18189.426
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.670,0.676,0.476,0.555,0.799,12476.741
+```
