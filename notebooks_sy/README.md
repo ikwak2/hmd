@@ -7,6 +7,23 @@
 * **model3_LCNN_rr_qrs.ipynb** - LCNN 모형에 rr interval(jk)과 qrs interval(sy) 변수 추가  
 * **Heart Rate Variability (HRV) analysis.ipynb** -QRS Code 확인
 ***
+## 2022.08.09. 화
+* LCNN_fix 파일 + qrs
+* LCNN_fix 파일 + qrs seq : 너무 오랜 시간 소요됨
+* LCNN_fix 파일 + wav2vac2 (lstm)
+* LCNN_fix 파일 + wav2vac2 (1D CNN) : LSTM 보다는 성능이 좋았으나, 교수님께서 올려주신 LCNN보다 성능 큰 성능 향상은 없었음
+```
+threshold:  0.75
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.723,0.544,0.420,0.634,0.734,13963.775
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.662,0.665,0.629,0.634,0.695,11878.815
+```
+
+
 > **QRS interval**    
 : wide한지 narrow한지 ECG 간격을 통해 부정맥 원인 부위를 짐작할 수 있다.  
 
