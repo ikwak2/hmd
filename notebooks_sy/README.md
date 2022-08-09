@@ -23,8 +23,7 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.662,0.665,0.629,0.634,0.695,11878.815
 ```
 
-
-> **QRS interval**    
+## QRS interval    
 : wide한지 narrow한지 ECG 간격을 통해 부정맥 원인 부위를 짐작할 수 있다.  
 
 ![qrs](https://user-images.githubusercontent.com/54921677/180925312-3e1fa6ea-b30a-41e5-8f6a-c27fc3ff30d2.png)
