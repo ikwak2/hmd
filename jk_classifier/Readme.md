@@ -82,3 +82,31 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.687,0.664,0.525,0.565,0.748,11964.332
 ```
+
+# Interval(1sec) & Wav2Vec2_Pretrained ->  LCNN
+ - 생각보다 성능이 많이 향상되지는 않았음. Mel 을 제외하고 실험해볼예정
+
+```
+threshold:  0.45
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.767,0.623,0.506,0.764,0.782,16161.004
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.723,0.737,0.415,0.545,0.844,13697.681
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.949,0.500,0.851
+AUPRC,0.869,0.073,0.928
+F-measure,0.679,0.000,0.840
+Accuracy,0.947,0.000,0.791
+
+#Outcome scores (per class)
+Classes,Abnormal,Normal
+AUROC,0.723,0.723
+AUPRC,0.769,0.706
+F-measure,0.690,0.139
+Accuracy,0.990,0.075
+```
