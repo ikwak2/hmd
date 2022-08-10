@@ -143,3 +143,5 @@ AUPRC,0.853,0.073,0.918
 F-measure,0.649,0.000,0.833
 Accuracy,0.947,0.000,0.770
 ```
+
+# Interval( 3sec/5sec/10sec 등) & Mel ->LCNN 시도예정
