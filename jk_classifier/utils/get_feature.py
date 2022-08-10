@@ -427,7 +427,7 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
                 datos=sp.io.wavfile.read(filename)
                 filtros=sio.loadmat('./Filters1')
                 tmp_interval = []
-                n_samp = len(datos[1])//4000
+                n_samp = len(datos[1])//per_sec
                                
                 
                 try:
