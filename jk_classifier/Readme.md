@@ -123,3 +123,23 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.670,0.676,0.476,0.555,0.799,12476.741
 ```
+#Interval(1sec) $ Wav2Vec2_Trainable = True  -> LCNN
+- true 로 했을 때 성능이 좀 더 뛰어나지기는 하지만 높은 수치는 아님
+- 도커에서 Wav2vec2 &trainable True & Dense로 실험해볼 예정
+```
+threshold:  0.25
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.764,0.615,0.494,0.749,0.774,14731.785
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.743,0.751,0.339,0.513,0.840,15140.890
+
+#Murmur scores (per class)
+Classes,Present,Unknown,Absent
+AUROC,0.942,0.500,0.849
+AUPRC,0.853,0.073,0.918
+F-measure,0.649,0.000,0.833
+Accuracy,0.947,0.000,0.770
+```
