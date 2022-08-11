@@ -29,7 +29,8 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.716,0.712,0.589,0.607,0.734,11453.603
 ```
 
-## LCNN fix + RR + W2V2(LCNN 모델에 적용, Model에서 w2v2 적용한 값 사용);Upgrading_models_LCNN_fix_RRinterval_w2v2
+## LCNN fix + RR + W2V2
+(LCNN 모델에 적용, Model에서 w2v2 적용한 값 사용);Upgrading_models_LCNN_fix_RRinterval_w2v2
 ```
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
@@ -55,11 +56,11 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 ```
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
-0.760,0.610,0.545,0.822,0.790,17566.761
+0.762,0.612,0.530,0.806,0.760,16936.442
 
 #Outcome scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
-0.716,0.712,0.589,0.607,0.734,11453.603
+0.685,0.679,0.549,0.597,0.799,11350.013
 ```
 
 ## 2022.08.09. 화
