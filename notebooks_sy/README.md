@@ -18,6 +18,16 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.669,0.676,0.559,0.581,0.719,11879.111
 ```
+```
+threshold:  0.5
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.760,0.610,0.555,0.832,0.795,17770.578
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.716,0.712,0.360,0.518,0.835,14704.473
+```
 
 ## 2022.08.09. 화
 * LCNN_fix 파일 + qrs
