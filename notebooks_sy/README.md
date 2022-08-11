@@ -6,7 +6,19 @@
 * **model2_LCNN_FFM_feature_tun.ipynb** - 교수님 LCNN 모형에 FFM feature tunning 진행  
 * **model3_LCNN_rr_qrs.ipynb** - LCNN 모형에 rr interval(jk)과 qrs interval(sy) 변수 추가  
 * **Heart Rate Variability (HRV) analysis.ipynb** -QRS Code 확인
-  
+ 
+ 
+## LCNN fix + RR + W2V2
+```
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.764,0.605,0.505,0.770,0.763,16138.476
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.669,0.676,0.559,0.581,0.719,11879.111
+```
+
 ## 2022.08.09. 화
 * LCNN_fix 파일 + qrs
 * LCNN_fix 파일 + qrs seq : 너무 오랜 시간 소요됨
