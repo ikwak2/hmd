@@ -50,7 +50,17 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.716,0.712,0.360,0.518,0.835,14704.473
 ```
 
-## LCNN fix + RR + W2V2(get_feature에서 w2v2 적용한 값 모델에 적용, 1D CNN); Upgrading_models_LCNN_fix_RRinterval_w2v2_copy1
+## LCNN fix + RR + W2V2
+(get_feature에서 w2v2 적용한 값 모델에 적용, 1D CNN); Upgrading_models_LCNN_fix_RRinterval_w2v2_copy1
+```
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.760,0.610,0.545,0.822,0.790,17566.761
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.716,0.712,0.589,0.607,0.734,11453.603
+```
 
 ## 2022.08.09. 화
 * LCNN_fix 파일 + qrs
