@@ -12,13 +12,6 @@ import tensorflow as tf
 import tensorflow as tf
 import tensorflow_hub as hub
 
-wav2vec2_pretrained = hub.KerasLayer("https://tfhub.dev/vasudevgupta7/wav2vec2/1", trainable=False)
-inputs = tf.keras.Input(shape=(246000,))
-hidden_states = wav2vec2_pretrained(inputs)
-wav2vec2_model = keras.Model(inputs = inputs , outputs = hidden_states )
-@tf.function(jit_compile=True)
-def forward(speech):
-    return wav2vec2_model(speech, training=True)
 
 def get_toy(mel_input_shape):
         # Create a towy model.
@@ -2721,7 +2714,8 @@ def get_LCNN_o_4_dr(mel_input_shape, cqt_input_shape, stft_input_shape,interval_
 
 
 
-def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape,use_mel = True, use_cqt = True, use_stft = True, ord1 = True, dp = .5, fc = False, ext = False,use_wav2=False):
+def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape,use_mel = True,
+                      use_cqt = False, use_stft = False, ord1 = True, dp = .5, fc = False, ext = False,use_wav2=False):
         # Create a towy model.
     age = keras.Input(shape=(6,), name = 'age_cat')
     sex = keras.Input(shape=(2,), name = 'sex_cat')
@@ -2733,7 +2727,8 @@ def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interva
     mel1 = keras.Input(shape=mel_input_shape, name = 'mel')
     cqt1 = keras.Input(shape=cqt_input_shape, name = 'cqt')
     stft1 = keras.Input(shape=stft_input_shape, name = 'stft')
-        
+    
+       
     ## age embeddig
     age1 = layers.Dense(2, activation = None)(age)
 
@@ -2907,13 +2902,6 @@ def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interva
     
     #1))))
     
-#     wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2)
-#     wav2_1 = tf.keras.layers.Conv1D(9, 3, activation='relu')(wav2_1)
-#     wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
-#     wav2_1 = tf.keras.layers.Conv1D(7, 3, activation='relu')(wav2_1)
-#     wav2_1 = tf.keras.layers.GlobalAveragePooling1D()(wav2_1)
-#     wav2_1 = layers.Dense(3, activation='relu')(wav2_1)
-
     #2))))
     
 #     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1)(wav2)
@@ -2952,179 +2940,184 @@ def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interva
 #     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=512)(wav2_1)
 #     wav2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation='relu',dilation_rate=1024)(wav2_1)
     
-    #3))))))
-#     wav2_1 = tf.keras.layers.GlobalMaxPooling1D()(wav2_1) 
+   
 
-#     wav2_1_1 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2)
-#     wav2_1_2 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2)
-#     wav2_mfm1 = tensorflow.keras.layers.maximum([wav2_1_1, wav2_1_2])
-#     wav2_maxpool_1 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm1)
+      # wav2_1 = tf.keras.layers.GlobalMaxPooling1D()(wav2_1) 
 
-    
-    
-#     wav2_2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_1)
-#     wav2_2_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_1)
-#     wav2_mfm2 = tensorflow.keras.layers.maximum([wav2_2_1, wav2_2_2])
-#     wav2_maxpool_2 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm2)
-    
-    
-#     wav2_3_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_2)
-#     wav2_3_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_2)
-#     wav2_mfm3 = tensorflow.keras.layers.maximum([wav2_3_1, wav2_3_2])
-#     wav2_maxpool_3 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm3)
-    
-#     wav2_4_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_3)
-#     wav2_4_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_3)
-#     wav2_mfm4 = tensorflow.keras.layers.maximum([wav2_4_1, wav2_4_2])
-#     wav2_maxpool_4 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm4)
-    
-#     wav2_5_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_4)
-#     wav2_5_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_4)
-#     wav2_mfm5 = tensorflow.keras.layers.maximum([wav2_5_1, wav2_5_1])
-#     wav2_maxpool_5 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm5)
-    
-#     wav2_6_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_5)
-#     wav2_6_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_5)
-#     wav2_mfm6 = tensorflow.keras.layers.maximum([wav2_6_1, wav2_6_2])
-#     wav2_maxpool_6 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm6)
-    
-#     wav2_7_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_6)
-#     wav2_7_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_6)
-#     wav2_mfm7 = tensorflow.keras.layers.maximum([wav2_7_1, wav2_7_2])
-#     wav2_maxpool_7 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm7)
-    
-#     wav2_8_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_7)
-#     wav2_8_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_7)
-#     wav2_mfm8 = tensorflow.keras.layers.maximum([wav2_8_1, wav2_8_2])
-#     wav2_maxpool_8 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm8)
-    
-#     wav2_9_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_8)
-#     wav2_9_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_8)
-#     wav2_mfm9 = tensorflow.keras.layers.maximum([wav2_9_1, wav2_9_2])
-#     wav2_maxpool_9 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm9)
-    
-#     wav2_10_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_9)
-#     wav2_10_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_9)
-#     wav2_mfm10 = tensorflow.keras.layers.maximum([wav2_10_1, wav2_10_2])
-#     wav2_maxpool_10 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm10)
-    
-    
- 
-    
-#     wav2_11_1 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2_maxpool_10)
-#     wav2_11_2 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2_maxpool_10)
-#     wav2_mfm11 = tensorflow.keras.layers.maximum([wav2_11_1, wav2_11_1])
-#     wav2_maxpool_11 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm11)
+    if use_wav2:
+        
+     
+        wav2_reshape = tf.keras.layers.Reshape((300,-1))(wav2)
+        wav2_1_1 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2_reshape)
+        wav2_1_2 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2_reshape)
+        wav2_mfm1 = tensorflow.keras.layers.maximum([wav2_1_1, wav2_1_2])
+        wav2_maxpool_1 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm1)
 
-    
-    
-#     wav2_12_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_11)
-#     wav2_12_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_11)
-#     wav2_mfm12 = tensorflow.keras.layers.maximum([wav2_12_1, wav2_12_2])
-#     wav2_maxpool_12 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm12)
-    
-    
-#     wav2_13_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_12)
-#     wav2_13_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_12)
-#     wav2_mfm13 = tensorflow.keras.layers.maximum([wav2_13_1, wav2_13_2])
-#     wav2_maxpool_13 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm13)
-    
-#     wav2_14_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_13)
-#     wav2_14_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_13)
-#     wav2_mfm14 = tensorflow.keras.layers.maximum([wav2_14_1, wav2_14_2])
-#     wav2_maxpool_14 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm14)
-    
-#     wav2_15_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_14)
-#     wav2_15_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_14)
-#     wav2_mfm15 = tensorflow.keras.layers.maximum([wav2_15_1, wav2_15_1])
-#     wav2_maxpool_15 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm15)
-    
-#     wav2_16_1 = tf.keras.layers.Conv1D(64, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_15)
-#     wav2_16_2 = tf.keras.layers.Conv1D(64, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_15)
-#     wav2_mfm16 = tensorflow.keras.layers.maximum([wav2_16_1, wav2_16_2])
-#     wav2_maxpool_16 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm16)
-    
-#     wav2_17_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_16)
-#     wav2_17_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_16)
-#     wav2_mfm17 = tensorflow.keras.layers.maximum([wav2_17_1, wav2_17_2])
-#     wav2_maxpool_17 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm17)
-    
-#     wav2_18_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_17)
-#     wav2_18_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_17)
-#     wav2_mfm18 = tensorflow.keras.layers.maximum([wav2_18_1, wav2_18_2])
-#     wav2_maxpool_18 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm18)
-    
-#     wav2_19_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_18)
-#     wav2_19_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_18)
-#     wav2_mfm19 = tensorflow.keras.layers.maximum([wav2_19_1, wav2_19_2])
-#     wav2_maxpool_19 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm19)
-    
-#     wav2_20_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_19)
-#     wav2_20_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_19)
-#     wav2_mfm20 = tensorflow.keras.layers.maximum([wav2_20_1, wav2_20_2])
-#     wav2_maxpool_20 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm20)    
-    
-#     wav2_1 = layers.GlobalAveragePooling1D()(wav2_maxpool_20)
-#     wav2_1 = Dropout(dp)(wav2_1)
+
+
+        wav2_2_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_1)
+        wav2_2_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_1)
+        wav2_mfm2 = tensorflow.keras.layers.maximum([wav2_2_1, wav2_2_2])
+        wav2_maxpool_2 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm2)
+
+
+        wav2_3_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_2)
+        wav2_3_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_2)
+        wav2_mfm3 = tensorflow.keras.layers.maximum([wav2_3_1, wav2_3_2])
+        wav2_maxpool_3 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm3)
+
+        wav2_4_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_3)
+        wav2_4_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_3)
+        wav2_mfm4 = tensorflow.keras.layers.maximum([wav2_4_1, wav2_4_2])
+        wav2_maxpool_4 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm4)
+
+        wav2_5_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_4)
+        wav2_5_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_4)
+        wav2_mfm5 = tensorflow.keras.layers.maximum([wav2_5_1, wav2_5_1])
+        wav2_maxpool_5 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm5)
+
+        wav2_6_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_5)
+        wav2_6_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_5)
+        wav2_mfm6 = tensorflow.keras.layers.maximum([wav2_6_1, wav2_6_2])
+        wav2_maxpool_6 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm6)
+
+        wav2_7_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_6)
+        wav2_7_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_6)
+        wav2_mfm7 = tensorflow.keras.layers.maximum([wav2_7_1, wav2_7_2])
+        wav2_maxpool_7 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm7)
+
+        wav2_8_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_7)
+        wav2_8_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_7)
+        wav2_mfm8 = tensorflow.keras.layers.maximum([wav2_8_1, wav2_8_2])
+        wav2_maxpool_8 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm8)
+
+        wav2_9_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_8)
+        wav2_9_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_8)
+        wav2_mfm9 = tensorflow.keras.layers.maximum([wav2_9_1, wav2_9_2])
+        wav2_maxpool_9 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm9)
+
+        wav2_10_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_9)
+        wav2_10_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_9)
+        wav2_mfm10 = tensorflow.keras.layers.maximum([wav2_10_1, wav2_10_2])
+        wav2_maxpool_10 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm10)
+
+
+
+
+        wav2_11_1 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2_maxpool_10)
+        wav2_11_2 = tf.keras.layers.Conv1D(9, 3, padding="causal",activation=None,dilation_rate=1)(wav2_maxpool_10)
+        wav2_mfm11 = tensorflow.keras.layers.maximum([wav2_11_1, wav2_11_1])
+        wav2_maxpool_11 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm11)
+
+
+
+        wav2_12_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_11)
+        wav2_12_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=2)(wav2_maxpool_11)
+        wav2_mfm12 = tensorflow.keras.layers.maximum([wav2_12_1, wav2_12_2])
+        wav2_maxpool_12 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm12)
+
+
+        wav2_13_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_12)
+        wav2_13_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=4)(wav2_maxpool_12)
+        wav2_mfm13 = tensorflow.keras.layers.maximum([wav2_13_1, wav2_13_2])
+        wav2_maxpool_13 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm13)
+
+        wav2_14_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_13)
+        wav2_14_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=8)(wav2_maxpool_13)
+        wav2_mfm14 = tensorflow.keras.layers.maximum([wav2_14_1, wav2_14_2])
+        wav2_maxpool_14 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm14)
+
+        wav2_15_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_14)
+        wav2_15_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=16)(wav2_maxpool_14)
+        wav2_mfm15 = tensorflow.keras.layers.maximum([wav2_15_1, wav2_15_1])
+        wav2_maxpool_15 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm15)
+
+        wav2_16_1 = tf.keras.layers.Conv1D(64, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_15)
+        wav2_16_2 = tf.keras.layers.Conv1D(64, 2, padding="causal",activation=None,dilation_rate=32)(wav2_maxpool_15)
+        wav2_mfm16 = tensorflow.keras.layers.maximum([wav2_16_1, wav2_16_2])
+        wav2_maxpool_16 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm16)
+
+        wav2_17_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_16)
+        wav2_17_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=64)(wav2_maxpool_16)
+        wav2_mfm17 = tensorflow.keras.layers.maximum([wav2_17_1, wav2_17_2])
+        wav2_maxpool_17 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm17)
+
+        wav2_18_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_17)
+        wav2_18_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=128)(wav2_maxpool_17)
+        wav2_mfm18 = tensorflow.keras.layers.maximum([wav2_18_1, wav2_18_2])
+        wav2_maxpool_18 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm18)
+
+        wav2_19_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_18)
+        wav2_19_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=256)(wav2_maxpool_18)
+        wav2_mfm19 = tensorflow.keras.layers.maximum([wav2_19_1, wav2_19_2])
+        wav2_maxpool_19 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm19)
+
+        wav2_20_1 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_19)
+        wav2_20_2 = tf.keras.layers.Conv1D(9, 2, padding="causal",activation=None,dilation_rate=512)(wav2_maxpool_19)
+        wav2_mfm20 = tensorflow.keras.layers.maximum([wav2_20_1, wav2_20_2])
+        wav2_maxpool_20 = tf.keras.layers.MaxPooling1D(pool_size=2,strides=1, padding='valid')(wav2_mfm20)    
+
+        wav2_1 = layers.GlobalAveragePooling1D()(wav2_maxpool_20)
+        wav2_1 = Dropout(dp)(wav2_1)
     #4))))))))00
     
     
-    if use_wav2 :
+#     if use_wav2 :
         
-        wav2vec2_layer = wav2vec2_model(wav2)
-        wav2vec2_layer = tf.keras.layers.Reshape((768,768,1))(wav2vec2_layer)
+#         wav2vec2_layer = wav2vec2_model(wav2)
+#         wav2vec2_layer = tf.keras.layers.Reshape((768,768,1))(wav2vec2_layer)
         
         
-        conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(wav2vec2_layer)
-        conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(wav2vec2_layer)
-        mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
-        max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
+#         conv1_1 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(wav2vec2_layer)
+#         conv1_2 = Conv2D(filters = 32, kernel_size =5, strides=(1, 1), padding='same', activation=None)(wav2vec2_layer)
+#         mfm2 = tensorflow.keras.layers.maximum([conv1_1, conv1_2])
+#         max3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm2)
 
-        conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
-        conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
-        mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
-        batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
+#         conv4_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+#         conv4_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max3)
+#         mfm5 = tensorflow.keras.layers.maximum([conv4_1, conv4_2])
+#         batch6 = BatchNormalization(axis=3, scale=False)(mfm5)
 
-        conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
-        conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
-        mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
+#         conv7_1 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+#         conv7_2 = Conv2D(filters = 48, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch6)
+#         mfm8 = tensorflow.keras.layers.maximum([conv7_1, conv7_2])
 
-        max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
-        batch10 = BatchNormalization(axis=3, scale=False)(max9)
+#         max9 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm8)
+#         batch10 = BatchNormalization(axis=3, scale=False)(max9)
 
-        conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
-        conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
-        mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
-        batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
+#         conv11_1 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+#         conv11_2 = Conv2D(filters = 48, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch10)
+#         mfm12 = tensorflow.keras.layers.maximum([conv11_1, conv11_2])
+#         batch13 = BatchNormalization(axis=3, scale=False)(mfm12)
 
-        conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
-        conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
-        mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
+#         conv14_1 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+#         conv14_2 = Conv2D(filters = 64, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch13)
+#         mfm15 = tensorflow.keras.layers.maximum([conv14_1, conv14_2])
 
-        max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
+#         max16 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')(mfm15)
 
-        conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
-        conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
-        mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
-        batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
+#         conv17_1 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+#         conv17_2 = Conv2D(filters = 64, kernel_size =1, strides=(1, 1), padding='same', activation=None)(max16)
+#         mfm18 = tensorflow.keras.layers.maximum([conv17_1, conv17_2])
+#         batch19 = BatchNormalization(axis=3, scale=False)(mfm18)
 
-        conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
-        conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
-        mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
-        batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
+#         conv20_1 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+#         conv20_2 = Conv2D(filters = 32, kernel_size =3, strides=(1, 1), padding='same', activation=None)(batch19)
+#         mfm21 = tensorflow.keras.layers.maximum([conv20_1, conv20_2])
+#         batch22 = BatchNormalization(axis=3, scale=False)(mfm21)
 
-        conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
-        conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
-        mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
-        batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
+#         conv23_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+#         conv23_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch22)
+#         mfm24 = tensorflow.keras.layers.maximum([conv23_1, conv23_2])
+#         batch25 = BatchNormalization(axis=3, scale=False)(mfm24)
 
-        conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
-        conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
-        mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
+#         conv26_1 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+#         conv26_2 = Conv2D(filters = 32, kernel_size =1, strides=(1, 1), padding='same', activation=None)(batch25)
+#         mfm27 = tensorflow.keras.layers.maximum([conv26_1, conv26_2])
 
-        max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
-        wav2_1 = layers.GlobalAveragePooling2D()(max28)
-        wav2_1 = Dropout(dp)(wav2_1)
+#         max28 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='valid')(mfm27)
+#         wav2_1 = layers.GlobalAveragePooling2D()(max28)
+#         wav2_1 = Dropout(dp)(wav2_1)
     
     ## mel embedding
     if use_mel :
@@ -3315,9 +3308,7 @@ def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interva
     if ord1 :
         res1 = layers.Dense(2, activation = "softmax")(concat2)
         
-        
 
-        
     else :
         res1 = layers.Dense(3, activation = "softmax")(concat2)
 
@@ -3330,8 +3321,6 @@ def get_LCNN_o_4_dr_1(mel_input_shape, cqt_input_shape, stft_input_shape,interva
     
     model.compile(loss=['categorical_crossentropy'], optimizer='adam', metrics=['accuracy','AUC'])
     return(model)
-
-
 
 
 def get_LCNN_o_4_dr_2(mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape,use_mel = True, use_cqt = True, use_stft = True, ord1 = True, dp = .5, fc = False, ext = False,use_wav2=False):
@@ -3684,7 +3673,7 @@ def get_LCNN_o_4_dr_2(mel_input_shape, cqt_input_shape, stft_input_shape,interva
     
     if use_wav2 :
         
-        wav2vec2_layer = wav2vec2_model(wav2)
+#         wav2vec2_layer = wav2vec2_model(wav2)
         wav2_1 = layers.Dense(15, activation='relu')(wav2vec2_layer)
         wav2_1 = layers.GlobalAveragePooling1D()(wav2_1)
         

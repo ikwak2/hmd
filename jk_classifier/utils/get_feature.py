@@ -340,7 +340,7 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
                              filter_scale = 1, n_bins = 80, fmin = 10, trim = 4000,
                              use_mel = True, use_cqt = False, use_stft = False, 
                              use_raw = False,use_interval=False,use_wav2=False
-                             ,max_interval_len=229, maxlen1=120000,min_dist=500,per_sec=4000
+                             , maxlen1=120000,min_dist=500,per_sec=16000,max_interval_len=192
                          ) :
     features = dict()
     features['id'] = []
@@ -618,32 +618,33 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
     
     if use_interval:
         
+        
         padded =pad_sequences(tmp_total_interval, maxlen=max_interval_len, dtype='float32', padding='post', truncating='post', value=0.0)
         
         for i in range(len(padded)):
             features['interval'].append(padded[i])
+        for i in range(len(features['interval'])):
+            features['interval'][i]= features['interval'][i].reshape(-1,1)
+        features['interval']= np.array(features['interval'])
         
     else:
         for i in range(len(tmp_interval)):
             features['interval'].append(tmp_total_interval[i])
-
-    if use_interval:
-        
         for i in range(len(features['interval'])):
             features['interval'][i]= features['interval'][i].reshape(-1,1)
-        
-    else:
-        for i in range(len(features['interval'])):
-            features['interval'][i]= features['interval'][i].reshape(-1,1)
+        features['interval']= np.array(features['interval'])
 
-    for k1 in features.keys() :
-        features[k1] = np.array(features[k1])   
+        
+#     for k1 in features.keys() :
+#         features[k1] = np.array(features[k1])   
     
     if use_wav2:
-        padded =pad_sequences(tmp_wav, maxlen=maxlen1, dtype='float64', padding='post', truncating='post', value=0.0)
+        padded =pad_sequences(tmp_wav, maxlen=maxlen1, dtype='float32', padding='post', truncating='post', value=0.0)
     
-        padded=np.array(padded, dtype=np.float32)
-        features['wav2']=padded
+                
+        for i in range(len(padded)):
+            features['wav2'].append(padded[i])
+        features['wav2']=np.array(features['wav2'])
         
     
     interval_input_shape = features['interval'].shape[1:]
