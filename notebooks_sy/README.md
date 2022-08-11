@@ -7,8 +7,29 @@
 * **model3_LCNN_rr_qrs.ipynb** - LCNN 모형에 rr interval(jk)과 qrs interval(sy) 변수 추가  
 * **Heart Rate Variability (HRV) analysis.ipynb** -QRS Code 확인
  
+## LCNN fix
+```
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.764,0.611,0.526,0.796,0.787,16753.292
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.713,0.707,0.557,0.602,0.801,11237.276
+```
  
-## LCNN fix + RR + W2V2
+## LCNN fix + RR 
+```
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.760,0.610,0.545,0.822,0.790,17566.761
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.716,0.712,0.589,0.607,0.734,11453.603
+```
+
+## LCNN fix + RR + W2V2(LCNN 모델에 적용, Model에서 w2v2 적용한 값 사용);Upgrading_models_LCNN_fix_RRinterval_w2v2
 ```
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
@@ -28,6 +49,8 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.716,0.712,0.360,0.518,0.835,14704.473
 ```
+
+## LCNN fix + RR + W2V2(get_feature에서 w2v2 적용한 값 모델에 적용, 1D CNN); Upgrading_models_LCNN_fix_RRinterval_w2v2_copy1
 
 ## 2022.08.09. 화
 * LCNN_fix 파일 + qrs
