@@ -15,6 +15,17 @@ sys.path.insert(0,'/home/jk21/Documents/hmd/jk_classifier/lucashnegri-peakutils-
 import peakutils
 
 
+import tensorflow as tf
+import tensorflow_hub as hub
+pretrained_layer = hub.KerasLayer("https://tfhub.dev/vasudevgupta7/wav2vec2/1", trainable=False)
+inputs = tf.keras.Input(shape=(246000,))
+hidden_states = pretrained_layer(inputs)
+outputs = tf.keras.layers.Dense(32)(hidden_states)
+wav2vec_model = tf.keras.Model(inputs=inputs, outputs=outputs)
+@tf.function(jit_compile=True)
+def forward(speech):
+    return wav2vec_model(speech, training=True)
+
 
 def feature_extract_melspec(fnm, samp_sec=20, sr = 4000, pre_emphasis = 0, hop_length=256, win_length = 512, n_mels = 100, trim = 0):
 
@@ -409,17 +420,18 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
 
             if use_raw :
                 frequency1, recording1 = sp.io.wavfile.read(filename)
-            else :
-                recording1 = np.zeros((1))
-            features['raw1'].append(recording1)
-            
-            
-            if use_wav2:
-                frequency1, recording1 = sp.io.wavfile.read(filename)
                 
             else :
                 recording1 = np.zeros( (1) )
-            tmp_wav.append(recording1)                  
+            tmp_wav.append(recording1)      
+            
+            
+#             if use_wav2:
+#                 frequency1, recording1 = sp.io.wavfile.read(filename)
+                
+#             else :
+#                 recording1 = np.zeros( (1) )
+#             tmp_wav.append(recording1)                  
             
             
             if use_interval :
@@ -585,7 +597,6 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
     if use_mel :
         M, N = features['mel1'][0].shape
         for i in range(len(features['mel1'])) :
-            
             features['mel1'][i] = features['mel1'][i].reshape(M,N,1)
             
     else :
@@ -638,13 +649,26 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
 #     for k1 in features.keys() :
 #         features[k1] = np.array(features[k1])   
     
-    if use_wav2:
+    if use_raw:
         padded =pad_sequences(tmp_wav, maxlen=maxlen1, dtype='float32', padding='post', truncating='post', value=0.0)
     
                 
         for i in range(len(padded)):
-            features['wav2'].append(padded[i])
-        features['wav2']=np.array(features['wav2'])
+            features['raw1'].append(padded[i])
+        features['raw1']=np.array(features['raw1'])
+    
+    if use_wav2:
+        
+        tmp_pad = padded[:,np.newaxis,:]
+        
+        tmp=[]
+        for i in tqdm.tqdm(range(len(tmp_pad))):
+            tmp_feature = wav2vec_model(tmp_pad[i])
+            tmp.append(tmp_feature)
+            
+        tmp=np.array(tmp, dtype=np.float32)
+        new_tmp1=tmp.reshape(-1,32,768)
+        features['wav2']=new_tmp1
         
     
     interval_input_shape = features['interval'].shape[1:]
@@ -653,16 +677,16 @@ def get_features_3lb_all_ord(data_folder, patient_files_trn, po = .3,
     
     print("interval: ", M,N)
     
-    wav2_input_shape = features['wav2'].shape[1:]
+    raw1_input_shape = features['raw1'].shape[1:]
     
-    M = wav2_input_shape
+    M = raw1_input_shape
     
-    print("wav2: ", M)
+    print("raw1: ", M)
     
     for k1 in features.keys() :
         features[k1] = np.array(features[k1])  
     
-    return features, mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,wav2_input_shape
+    return features, mel_input_shape, cqt_input_shape, stft_input_shape,interval_input_shape,raw1_input_shape
 
 
 
