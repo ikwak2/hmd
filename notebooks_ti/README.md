@@ -13,5 +13,9 @@
 ## experiment_wav2vec2_freeze_dnn
 - 끝 layer를 linear 2층으로 수정 후, 그것을 제외하고 weight를 freeze
 
-# 텐서플로용 wav2vec2
+### 텐서플로용 wav2vec2
 - https://www.tensorflow.org/hub/tutorials/wav2vec2_saved_model_finetuning 에 나와있긴한데 저는 파이토치만 실험했습니다,,!
+# hrv.py
+- Heart rate variability의 통계량들을 뽑기 위한 파일.
+- hrv_stat함수에 peak의 index를 넣으면 통계량을 뱉는다.
+- neurokit2 
