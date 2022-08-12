@@ -29,7 +29,7 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.716,0.712,0.589,0.607,0.734,11453.603
 ```
 
-## LCNN fix + RR + W2V2
+## LCNN fix + RR + W2V2(ext =F)
 (LCNN 모델에 적용, Model에서 w2v2 적용한 값 사용);Upgrading_models_LCNN_fix_RRinterval_w2v2
 ```
 #Murmur scores
@@ -50,6 +50,10 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.716,0.712,0.360,0.518,0.835,14704.473
 ```
+## LCNN fix + RR + W2V2(ext = T) -> 학습중
+Upgrading_models_LCNN_fix_RRinterval_w2v2_ext
+```
+```
 
 ## LCNN fix + RR + W2V2
 (get_feature에서 w2v2 적용한 값 모델에 적용, 1D CNN); Upgrading_models_LCNN_fix_RRinterval_w2v2_copy1
@@ -62,6 +66,12 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.685,0.679,0.549,0.597,0.799,11350.013
 ```
+
+## LCNN + qrs + w2v2 -> 학습중
+현재 다른 모델보다 안정적으로 val_acc가 높음. mel, stft, cqt 모두 사용
+```
+```
+
 
 ## 2022.08.09. 화
 * LCNN_fix 파일 + qrs
