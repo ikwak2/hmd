@@ -6,6 +6,7 @@
 * **model2_LCNN_FFM_feature_tun.ipynb** - 교수님 LCNN 모형에 FFM feature tunning 진행  
 * **model3_LCNN_rr_qrs.ipynb** - LCNN 모형에 rr interval(jk)과 qrs interval(sy) 변수 추가  
 * **Heart Rate Variability (HRV) analysis.ipynb** -QRS Code 확인
+* **Upgrading_models_LCNN_fix_RRinterval_w2v2.ipynb** - LCNN fix 모형 + RR interval + w2v2 적용 (RR interval 사용방법 포함) 
  
 ## LCNN fix
 ```
