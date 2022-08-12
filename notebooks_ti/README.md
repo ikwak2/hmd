@@ -18,4 +18,4 @@
 # hrv.py
 - Heart rate variability의 통계량들을 뽑기 위한 파일.
 - hrv_stat함수에 peak의 index를 넣으면 통계량을 뱉는다.
-- neurokit2 
+- neurokit2 참고.
