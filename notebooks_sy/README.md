@@ -29,7 +29,7 @@ AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
 0.716,0.712,0.589,0.607,0.734,11453.603
 ```
 ## W2V2
-960h pre-train 모형이 조금 더 성능이 
+960h pre-train 모형이 조금 더 성능이 나아 보였음
 
 ## LCNN fix + RR + W2V2(ext =F)
 (LCNN 모델에 적용, Model에서 w2v2 적용한 값 사용);Upgrading_models_LCNN_fix_RRinterval_w2v2
