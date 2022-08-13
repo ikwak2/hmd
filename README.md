@@ -35,7 +35,7 @@ Murmur, outcome
 ```
 # Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
 Murmur, outcome
-0.723, 10022
+0.709, 9903
 0.668, 10290.577
 ```
 
