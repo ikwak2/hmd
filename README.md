@@ -31,7 +31,7 @@ Murmur, outcome
 0.723, 10022
 ```
 
-- Wav2vec2
+- Wav2vec2 - 태인학생 모형
 ```
 # Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
 Murmur, outcome
@@ -39,12 +39,12 @@ Murmur, outcome
 0.668, 10290.577
 ```
 
-- LCNN using melspectrogram with mixup, FFM RP augmentation, RR, wav2vec2 - 정국학생모형
+- LCNN using melspectrogram with mixup, FFM RP augmentation, RR, wav2vec2 - 정국학생 모형
 
 ```
 Murmur, outcome
 0.747, 10200
-# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+# Leader board scores  
 Murmur, outcome
 ?, ?
 ```
@@ -54,7 +54,7 @@ Murmur, outcome
 ```
 Murmur, outcome
 0.790, 11250
-# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+# Leader board scores 
 Murmur, outcome
 ?, ?
 ```
@@ -64,7 +64,7 @@ Murmur, outcome
 ```
 Murmur, outcome
 0.810, 11636
-# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+# Leader board scores  
 Murmur, outcome
 ?, ?
 ```
