@@ -8,6 +8,57 @@
 * **Heart Rate Variability (HRV) analysis.ipynb** -QRS Code 확인
 * **Upgrading_models_LCNN_fix_RRinterval_w2v2.ipynb** - LCNN fix 모형 + RR interval + w2v2 적용 (RR interval 사용방법 포함) 
  
+## Upgrading_models_LCNN_fix_RRinterval_w2v2_ext
+```
+threshold:  0.65
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.744,0.603,0.475,0.728,0.741,15377.795
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.690,0.697,0.630,0.649,0.789,10488.714
+```
+
+
+## Upgrading_models3_LCNN-cost_rr_qrs2_RR
+```
+threshold:  0.25
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.754,0.594,0.516,0.791,0.763,15283.424
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.684,0.670,0.532,0.560,0.712,12192.411
+```
+## Upgrading_models_LCNN_fix_RRinterval_w2v2
+```
+threshold:  0.5
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.762,0.613,0.543,0.822,0.779,17981.697
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.693,0.683,0.406,0.518,0.794,13683.005
+```
+## Upgrading_models3_LCNN-cost_rr_qrs2
+```
+threshold:  0.5
+#Murmur scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.763,0.608,0.562,0.843,0.801,17140.771
+
+#Outcome scores
+AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
+0.740,0.724,0.649,0.660,0.532,16117.494
+```
+
+
+
+ 
+ 
 ## LCNN fix
 ```
 #Murmur scores
