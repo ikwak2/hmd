@@ -17,7 +17,7 @@ Participating [heart murmur detection challenge](https://moody-challenge.physion
 
 ## Submissions (1/10)
 
-- LNNN using melspectrogram with mixup, FFM RP augmentation
+- LCNN using melspectrogram with mixup, FFM RP augmentation
 ```
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
@@ -31,4 +31,41 @@ Murmur, outcome
 0.723, 10022
 ```
 
+- Wav2vec2
+```
+# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+Murmur, outcome
+0.723, 10022
+0.668, 10290.577
+```
+
+- LCNN using melspectrogram with mixup, FFM RP augmentation, RR, wav2vec2 - 정국학생모형
+
+```
+Murmur, outcome
+0.747, 10200
+# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+Murmur, outcome
+?, ?
+```
+
+- LCNN using melspectrogram with mixup, cutout augmentation - 최적화 버전한번 더 내 봄
+
+```
+Murmur, outcome
+0.790, 11250
+# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+Murmur, outcome
+?, ?
+```
+
+- LCNN using melspectrogram with mixup, cutout augmentation, RR 평균 추가 
+
+```
+Murmur, outcome
+0.810, 11636
+# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+Murmur, outcome
+?, ?
+```
 
