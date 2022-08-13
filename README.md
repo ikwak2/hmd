@@ -38,10 +38,10 @@ Murmur, outcome
 0.668, 10290.577
 ```
 
+- 뭔지 모르겠는데 섞인 것 같은 스코어
 ```
-뭔지 모르겠는데 섞인 것 같은 스코어
 0.709, 9903
-'''
+```
 
 - LCNN using melspectrogram with mixup, FFM RP augmentation, RR, wav2vec2 - 정국학생 모형
 
