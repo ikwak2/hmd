@@ -15,9 +15,9 @@ Participating [heart murmur detection challenge](https://moody-challenge.physion
 - Threshold 조절해서 스코어 최적화 (Done, Controlling thresholds.ipynb)
 - pytorch 진행하는 학생들: 1. AAIST (raw audio 피쳐로 graph neural net 쓰는 모형) 시도해 봐도 좋을듯 2. AAIST 임베딩과 다른 모형 임베딩 합쳐서 2단 트레이닝으로 구성해서 앙상블모형 작성해봐도 좋을듯 (이건 tensorflow로 푸는 쪽도 고려해볼만함)
 
-## Submissions (1/10)
+## Submissions (6/10)
 
-- LNNN using melspectrogram with mixup, FFM RP augmentation
+- LCNN using melspectrogram with mixup, FFM RP augmentation
 ```
 #Murmur scores
 AUROC,AUPRC,F-measure,Accuracy,Weighted Accuracy,Cost
@@ -31,4 +31,45 @@ Murmur, outcome
 0.723, 10022
 ```
 
+- Wav2vec2 - 태인학생 모형
+```
+# Leader board scores  ## 이유는 모르겠지만 두번 평가된것같음
+Murmur, outcome
+0.668, 10290.577
+```
+
+- 뭔지 모르겠는데 섞인 것 같은 스코어
+```
+0.709, 9903
+```
+
+- LCNN using melspectrogram with mixup, FFM RP augmentation, RR, wav2vec2 - 정국학생 모형
+
+```
+Murmur, outcome
+0.747, 10200
+# Leader board scores  
+Murmur, outcome
+?, ?
+```
+
+- LCNN using melspectrogram with mixup, cutout augmentation - 최적화 버전한번 더 내 봄
+
+```
+Murmur, outcome
+0.790, 11250
+# Leader board scores 
+Murmur, outcome
+?, ?
+```
+
+- LCNN using melspectrogram with mixup, cutout augmentation, RR 평균 추가 
+
+```
+Murmur, outcome
+0.810, 11636
+# Leader board scores  
+Murmur, outcome
+?, ?
+```
 
