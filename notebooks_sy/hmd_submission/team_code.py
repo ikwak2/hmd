@@ -78,7 +78,7 @@ def train_challenge_model(data_folder, model_folder, verbose):
         print('Extracting features and labels from the Challenge data...')
 
         
-    per_sec = 4000
+    per_sec = 16000
     winlen = 512
     hoplen = 256
     nmel = 120 #np.random.choice([100, 120, 140])
