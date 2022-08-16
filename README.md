@@ -70,7 +70,7 @@ Murmur, outcome
 0.810, 11636
 # Leader board scores  
 Murmur, outcome
-?, ?
+0.734, 9493.204 
 ```
 
 - LCNN using melspectrogram with mixup, cutout augmentation, RR 평균 추가 - 40초 버전 
@@ -80,7 +80,7 @@ Murmur, outcome
 0.774, 11736
 # Leader board scores  
 Murmur, outcome
-?, ?
+0.716, 10056.078
 ```
 
 - LCNN using melspectrogram with mixup, cutout augmentation, RR 평균 추가 - 40초 버전 미세조정 
@@ -88,7 +88,7 @@ Murmur, outcome
 ```
 # Leader board scores  
 Murmur, outcome
-?, ?
+0.727, 10627.094
 ```
 
 - LCNN using melspectrogram with mixup, cutout augmentation, RR 평균 추가 - 40초 버전 미세조정
@@ -96,5 +96,14 @@ Murmur, outcome
 ```
 # Leader board scores  
 Murmur, outcome
-?, ?
+0.706, 12253.91
 ```
+
+- LCNN using melspectrogram with mixup, FFM RP augmentation, RR, wav2vec2 - 정국학생 모형
+
+```
+# Leader board scores  
+Murmur, outcome
+0.723, 9715.077
+```
+
