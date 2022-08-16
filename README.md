@@ -63,7 +63,8 @@ Murmur, outcome
 0.727, 11167.537
 ```
 
-- *LCNN using melspectrogram with mixup, cutout augmentation, RR 평균 추가 *
+- LCNN using melspectrogram with mixup, cutout augmentation, RR 평균 추가 
+   - 제출버전
 
 ```
 Murmur, outcome
