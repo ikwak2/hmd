@@ -1,1 +1,0 @@
-Proposed ReLCNN model
